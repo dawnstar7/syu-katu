@@ -134,13 +134,13 @@ export default function CompanyModal({ isOpen, onClose, onSave, company }: Compa
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
         {/* ヘッダー */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-gray-900">
+        <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-blue-700 border-b border-blue-800 px-6 py-5 flex items-center justify-between rounded-t-lg">
+          <h2 className="text-2xl font-bold text-white">
             {company ? '企業情報を編集' : '企業を追加'}
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-white hover:text-blue-100 transition-colors"
           >
             <X className="w-6 h-6" />
           </button>
@@ -183,7 +183,7 @@ export default function CompanyModal({ isOpen, onClose, onSave, company }: Compa
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-base font-medium text-gray-900 mb-2">
                   企業名 <span className="text-red-500">*</span>
                 </label>
                 <input
@@ -192,66 +192,66 @@ export default function CompanyModal({ isOpen, onClose, onSave, company }: Compa
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   disabled={isLoadingAI}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                   placeholder="株式会社〇〇"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">業界</label>
+                <label className="block text-base font-medium text-gray-900 mb-2">業界</label>
                 <input
                   type="text"
                   value={formData.industry}
                   onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
                   disabled={isLoadingAI}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                  className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
                   placeholder="IT、製造業、金融など"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">従業員数</label>
+                <label className="block text-base font-medium text-gray-900 mb-2">従業員数</label>
                 <input
                   type="text"
                   value={formData.employeeCount}
                   onChange={(e) => setFormData({ ...formData, employeeCount: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                  className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
                   disabled={isLoadingAI}
                   placeholder="100名、1000名以上など"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">本社所在地</label>
+                <label className="block text-base font-medium text-gray-900 mb-2">本社所在地</label>
                 <input
                   type="text"
                   value={formData.location}
                   onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                  className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
                   disabled={isLoadingAI}
                   placeholder="東京都渋谷区"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">ホームページ</label>
+                <label className="block text-base font-medium text-gray-900 mb-2">ホームページ</label>
                 <input
                   type="url"
                   value={formData.website}
                   onChange={(e) => setFormData({ ...formData, website: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                  className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
                   disabled={isLoadingAI}
                   placeholder="https://example.com"
                 />
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">企業説明</label>
+                <label className="block text-base font-medium text-gray-900 mb-2">企業説明</label>
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                  className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
                   disabled={isLoadingAI}
                   placeholder="企業の特徴や事業内容など"
                 />
@@ -264,48 +264,48 @@ export default function CompanyModal({ isOpen, onClose, onSave, company }: Compa
             <h3 className="text-lg font-semibold text-gray-900 mb-4">募集要項</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">職種</label>
+                <label className="block text-base font-medium text-gray-900 mb-2">職種</label>
                 <input
                   type="text"
                   value={formData.jobType}
                   onChange={(e) => setFormData({ ...formData, jobType: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                  className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
                   disabled={isLoadingAI}
                   placeholder="エンジニア、営業など"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">給与</label>
+                <label className="block text-base font-medium text-gray-900 mb-2">給与</label>
                 <input
                   type="text"
                   value={formData.salary}
                   onChange={(e) => setFormData({ ...formData, salary: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                  className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
                   disabled={isLoadingAI}
                   placeholder="月給25万円〜など"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">勤務地</label>
+                <label className="block text-base font-medium text-gray-900 mb-2">勤務地</label>
                 <input
                   type="text"
                   value={formData.workLocation}
                   onChange={(e) => setFormData({ ...formData, workLocation: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                  className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
                   disabled={isLoadingAI}
                   placeholder="東京都、大阪府など"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">福利厚生</label>
+                <label className="block text-base font-medium text-gray-900 mb-2">福利厚生</label>
                 <input
                   type="text"
                   value={formData.benefits}
                   onChange={(e) => setFormData({ ...formData, benefits: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                  className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
                   disabled={isLoadingAI}
                   placeholder="社会保険完備、リモートワーク可など"
                 />
@@ -318,13 +318,13 @@ export default function CompanyModal({ isOpen, onClose, onSave, company }: Compa
             <h3 className="text-lg font-semibold text-gray-900 mb-4">選考情報</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-base font-medium text-gray-900 mb-2">
                   現在のステータス
                 </label>
                 <select
                   value={formData.currentStatus}
                   onChange={(e) => setFormData({ ...formData, currentStatus: e.target.value as SelectionStatus })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                  className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
                   disabled={isLoadingAI}
                 >
                   {Object.entries(STATUS_LABELS).map(([value, label]) => (
@@ -336,11 +336,11 @@ export default function CompanyModal({ isOpen, onClose, onSave, company }: Compa
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">優先度</label>
+                <label className="block text-base font-medium text-gray-900 mb-2">優先度</label>
                 <select
                   value={formData.priority}
                   onChange={(e) => setFormData({ ...formData, priority: e.target.value as 'high' | 'medium' | 'low' })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                  className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
                   disabled={isLoadingAI}
                 >
                   <option value="high">高</option>
@@ -355,9 +355,9 @@ export default function CompanyModal({ isOpen, onClose, onSave, company }: Compa
                     type="checkbox"
                     checked={formData.favorite}
                     onChange={(e) => setFormData({ ...formData, favorite: e.target.checked })}
-                    className="w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                    className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
                   />
-                  <span className="text-sm font-medium text-gray-700">お気に入り</span>
+                  <span className="text-base font-medium text-gray-900">お気に入り</span>
                 </label>
               </div>
             </div>
@@ -370,12 +370,12 @@ export default function CompanyModal({ isOpen, onClose, onSave, company }: Compa
 
           {/* メモ */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">メモ</label>
+            <label className="block text-base font-medium text-gray-900 mb-2">メモ</label>
             <textarea
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               rows={4}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="気になったことや選考対策のメモなど"
             />
           </div>
