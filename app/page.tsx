@@ -73,14 +73,6 @@ export default function Home() {
     }
   };
 
-  const handleQuickStatusUpdate = (companyId: string, newStatus: SelectionStatus) => {
-    setCompanies(companies.map(c =>
-      c.id === companyId
-        ? { ...c, currentStatus: newStatus, updatedAt: new Date() }
-        : c
-    ));
-  };
-
   const handleEventClick = (event: CalendarEvent) => {
     setSelectedEvent(event);
     setIsEventModalOpen(true);
@@ -300,99 +292,52 @@ export default function Home() {
               return (
                 <div
                   key={company.id}
-                  className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-all"
+                  onClick={() => handleEditCompany(company)}
+                  className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all cursor-pointer"
                 >
-                  <div
-                    onClick={() => handleEditCompany(company)}
-                    className="p-4 cursor-pointer"
-                  >
-                    {/* 企業名とステータス */}
-                    <div className="flex items-start justify-between gap-3 mb-3">
-                      <h3 className="text-base font-bold text-gray-900 line-clamp-2 flex-1">
-                        {company.name}
-                      </h3>
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap ${STATUS_COLORS[company.currentStatus]}`}>
-                        {STATUS_LABELS[company.currentStatus]}
-                      </span>
-                    </div>
+                  {/* 企業名とステータス */}
+                  <div className="flex items-start justify-between gap-3 mb-3">
+                    <h3 className="text-base font-bold text-gray-900 line-clamp-2 flex-1">
+                      {company.name}
+                    </h3>
+                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap ${STATUS_COLORS[company.currentStatus]}`}>
+                      {STATUS_LABELS[company.currentStatus]}
+                    </span>
+                  </div>
 
-                    {/* 業界・職種 */}
-                    <div className="space-y-1 mb-3">
-                      {company.industry && (
-                        <p className="text-sm text-gray-600 flex items-center gap-1">
-                          <span className="text-gray-400">📊</span>
-                          {company.industry}
-                        </p>
-                      )}
-                      {company.jobType && (
-                        <p className="text-sm text-gray-600 flex items-center gap-1">
-                          <span className="text-gray-400">💼</span>
-                          {company.jobType}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* 直近の予定 */}
-                    {upcomingStep && (
-                      <div className="bg-blue-50 rounded-lg px-3 py-2 mb-3">
-                        <p className="text-xs text-blue-600 font-medium mb-1">直近の予定</p>
-                        <p className="text-sm text-gray-900 font-medium">{upcomingStep.name}</p>
-                        <p className="text-xs text-gray-600 mt-1">
-                          {format(new Date(upcomingStep.scheduledDate!), 'M月d日 HH:mm')}
-                        </p>
-                      </div>
+                  {/* 業界・職種 */}
+                  <div className="space-y-1 mb-3">
+                    {company.industry && (
+                      <p className="text-sm text-gray-600 flex items-center gap-1">
+                        <span className="text-gray-400">📊</span>
+                        {company.industry}
+                      </p>
                     )}
-
-                    {/* 選考進捗 */}
-                    {company.selectionSteps.length > 0 && (
-                      <div className="text-xs text-gray-500">
-                        選考ステップ: {company.selectionSteps.filter(s => s.status === 'completed').length}/{company.selectionSteps.length} 完了
-                      </div>
+                    {company.jobType && (
+                      <p className="text-sm text-gray-600 flex items-center gap-1">
+                        <span className="text-gray-400">💼</span>
+                        {company.jobType}
+                      </p>
                     )}
                   </div>
 
-                  {/* クイックステータス変更ボタン */}
-                  <div className="px-4 py-2.5 bg-gray-50 border-t border-gray-200 flex gap-2">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleQuickStatusUpdate(company.id, 'es_writing');
-                      }}
-                      className={`flex-1 px-2 py-1.5 text-xs font-medium rounded transition-all ${
-                        ['es_writing', 'es_submitted', 'document_screening', 'interview_1', 'interview_2', 'interview_3', 'interview_final'].includes(company.currentStatus)
-                          ? 'bg-blue-600 text-white shadow-sm'
-                          : 'bg-white text-gray-600 border border-gray-300 hover:bg-gray-50'
-                      }`}
-                    >
-                      選考中
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleQuickStatusUpdate(company.id, 'offer');
-                      }}
-                      className={`flex-1 px-2 py-1.5 text-xs font-medium rounded transition-all ${
-                        company.currentStatus === 'offer'
-                          ? 'bg-green-600 text-white shadow-sm'
-                          : 'bg-white text-gray-600 border border-gray-300 hover:bg-gray-50'
-                      }`}
-                    >
-                      内定
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleQuickStatusUpdate(company.id, 'rejected');
-                      }}
-                      className={`flex-1 px-2 py-1.5 text-xs font-medium rounded transition-all ${
-                        company.currentStatus === 'rejected'
-                          ? 'bg-red-600 text-white shadow-sm'
-                          : 'bg-white text-gray-600 border border-gray-300 hover:bg-gray-50'
-                      }`}
-                    >
-                      不合格
-                    </button>
-                  </div>
+                  {/* 直近の予定 */}
+                  {upcomingStep && (
+                    <div className="bg-blue-50 rounded-lg px-3 py-2 mb-3">
+                      <p className="text-xs text-blue-600 font-medium mb-1">直近の予定</p>
+                      <p className="text-sm text-gray-900 font-medium">{upcomingStep.name}</p>
+                      <p className="text-xs text-gray-600 mt-1">
+                        {format(new Date(upcomingStep.scheduledDate!), 'M月d日 HH:mm')}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* 選考進捗 */}
+                  {company.selectionSteps.length > 0 && (
+                    <div className="text-xs text-gray-500">
+                      選考ステップ: {company.selectionSteps.filter(s => s.status === 'completed').length}/{company.selectionSteps.length} 完了
+                    </div>
+                  )}
                 </div>
               );
             })}
