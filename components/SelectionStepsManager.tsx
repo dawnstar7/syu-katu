@@ -32,6 +32,7 @@ const PRESET_STEPS = [
 export default function SelectionStepsManager({ steps, onChange }: SelectionStepsManagerProps) {
   const [newStepName, setNewStepName] = useState('');
   const [showPresets, setShowPresets] = useState(true);
+  const [showCustomInput, setShowCustomInput] = useState(false);
 
   const handleAddStep = (stepName?: string) => {
     const name = stepName || newStepName;
@@ -50,6 +51,7 @@ export default function SelectionStepsManager({ steps, onChange }: SelectionStep
 
   const handleAddPresetStep = (presetName: string) => {
     handleAddStep(presetName);
+    setShowCustomInput(false);
   };
 
   const handleDeleteStep = (stepId: string) => {
@@ -217,15 +219,18 @@ export default function SelectionStepsManager({ steps, onChange }: SelectionStep
 
       {/* 新しいステップを追加 */}
       <div className="space-y-2">
-        {/* プリセット選択（ステップがある場合） */}
+        {/* プリセット選択 */}
         {steps.length > 0 && (
           <div>
             <label className="block text-sm font-medium text-gray-900 mb-2">
-              プリセットから追加
+              選考ステップを追加
             </label>
             <select
               onChange={(e) => {
-                if (e.target.value) {
+                if (e.target.value === 'custom') {
+                  setShowCustomInput(true);
+                  setNewStepName('');
+                } else if (e.target.value) {
                   handleAddPresetStep(e.target.value);
                   e.target.value = '';
                 }
@@ -238,34 +243,51 @@ export default function SelectionStepsManager({ steps, onChange }: SelectionStep
                   {preset}
                 </option>
               ))}
+              <option value="custom">その他（カスタム）</option>
             </select>
           </div>
         )}
 
-        {/* 手動入力 */}
-        <div>
-          <label className="block text-sm font-medium text-gray-900 mb-2">
-            カスタムステップを追加
-          </label>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={newStepName}
-              onChange={(e) => setNewStepName(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleAddStep()}
-              placeholder="例: 書類選考、一次面接"
-              className="flex-1 px-3 py-2 text-gray-900 placeholder:text-gray-500 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <button
-              type="button"
-              onClick={() => handleAddStep()}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              <span>追加</span>
-            </button>
+        {/* カスタム入力（「その他」選択時のみ表示） */}
+        {steps.length > 0 && showCustomInput && (
+          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+            <label className="block text-sm font-medium text-gray-900 mb-2">
+              カスタムステップ名を入力
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={newStepName}
+                onChange={(e) => setNewStepName(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleAddStep()}
+                placeholder="例: 特別選考、面談"
+                className="flex-1 px-3 py-2 text-gray-900 placeholder:text-gray-500 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                autoFocus
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  handleAddStep();
+                  setShowCustomInput(false);
+                }}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                <span>追加</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowCustomInput(false);
+                  setNewStepName('');
+                }}
+                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                キャンセル
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
