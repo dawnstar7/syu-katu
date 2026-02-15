@@ -176,7 +176,7 @@ export default function Home() {
                 placeholder="企業名、業界で検索..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-10 pr-4 py-2 text-gray-900 placeholder:text-gray-500 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
@@ -186,7 +186,7 @@ export default function Home() {
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value as SelectionStatus | 'all')}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-4 py-2 text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="all">すべてのステータス</option>
                 {Object.entries(STATUS_LABELS).map(([value, label]) => (
@@ -260,7 +260,7 @@ export default function Home() {
 
         {/* 企業リスト（リストビューのみ） */}
         {currentView === 'list' && (
-        {filteredCompanies.length === 0 ? (
+          filteredCompanies.length === 0 ? (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
             <Building2 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">
@@ -335,7 +335,7 @@ export default function Home() {
               </div>
             ))}
           </div>
-        )}
+        )
         )}
       </main>
 
