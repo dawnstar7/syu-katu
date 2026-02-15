@@ -196,3 +196,90 @@ export const EVENT_TYPE_LABELS: Record<CalendarEvent['type'], string> = {
   interview: '面接',
   event: 'イベント',
 };
+
+// 自己分析エピソード
+export interface SelfAnalysisEpisode {
+  id: string;
+  title: string; // エピソードタイトル
+  category: 'gakunika' | 'success' | 'failure' | 'challenge' | 'other'; // カテゴリ
+  what: string; // 何をしたか
+  why: string; // なぜそれをしたか
+  how: string; // どのように行ったか
+  result: string; // 結果どうなったか
+  learning: string; // 学んだこと
+  tags: string[]; // タグ（例: リーダーシップ、チームワーク、課題解決など）
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// 価値観・モチベーション
+export interface ValueAndMotivation {
+  id: string;
+  importantValues: string; // 大切にしていること
+  motivationSource: string; // モチベーションの源泉
+  excitingMoments: string; // ワクワクする瞬間
+  lifeAxis: string; // 人生の軸
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// 強み・弱み
+export interface StrengthAndWeakness {
+  id: string;
+  type: 'strength' | 'weakness'; // 強みか弱みか
+  name: string; // 名前（例: 論理的思考、忍耐力）
+  description: string; // 説明
+  evidence: string; // 裏付けとなる具体的な事実・エピソード
+  tags: string[]; // タグ
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// 将来ビジョン
+export interface FutureVision {
+  id: string;
+  shortTerm: string; // 短期（1-3年後）
+  midTerm: string; // 中期（5年後）
+  longTerm: string; // 長期（10年後）
+  socialContribution: string; // 社会への貢献
+  idealCareer: string; // 理想のキャリア
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// 自己分析データ全体
+export interface SelfAnalysisData {
+  episodes: SelfAnalysisEpisode[]; // エピソード集
+  values: ValueAndMotivation | null; // 価値観・モチベーション
+  strengths: StrengthAndWeakness[]; // 強み
+  weaknesses: StrengthAndWeakness[]; // 弱み
+  vision: FutureVision | null; // 将来ビジョン
+}
+
+// ES生成リクエスト
+export interface ESGenerationRequest {
+  companyId: string; // 対象企業
+  question: string; // ES設問
+  characterLimit: number; // 文字数制限
+  selectedEpisodes: string[]; // 使用するエピソードID
+  selectedStrengths: string[]; // 使用する強みID
+  tone: 'passionate' | 'calm' | 'humble' | 'logical'; // トーン
+  useCompanyAnalysis: boolean; // 企業分析を活用するか
+}
+
+// トーンのラベル
+export const TONE_LABELS: Record<ESGenerationRequest['tone'], string> = {
+  passionate: '情熱的に',
+  calm: '冷静に',
+  humble: '謙虚に',
+  logical: '論理的に',
+};
+
+// エピソードカテゴリのラベル
+export const EPISODE_CATEGORY_LABELS: Record<SelfAnalysisEpisode['category'], string> = {
+  gakunika: 'ガクチカ',
+  success: '成功体験',
+  failure: '挫折経験',
+  challenge: '困難克服',
+  other: 'その他',
+};
