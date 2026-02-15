@@ -58,6 +58,14 @@ export default function Home() {
     setIsModalOpen(true);
   };
 
+  const handleDeleteCompany = (companyId: string) => {
+    if (window.confirm('この企業を削除してもよろしいですか？')) {
+      setCompanies(companies.filter(c => c.id !== companyId));
+      setIsModalOpen(false);
+      setSelectedCompany(undefined);
+    }
+  };
+
   // フィルタリングされた企業リスト
   const filteredCompanies = companies.filter((company) => {
     const matchesSearch = company.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -236,6 +244,7 @@ export default function Home() {
           setSelectedCompany(undefined);
         }}
         onSave={handleSaveCompany}
+        onDelete={handleDeleteCompany}
         company={selectedCompany}
       />
     </div>

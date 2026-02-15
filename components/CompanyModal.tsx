@@ -10,10 +10,11 @@ interface CompanyModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (company: Omit<Company, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  onDelete?: (companyId: string) => void;
   company?: Company;
 }
 
-export default function CompanyModal({ isOpen, onClose, onSave, company }: CompanyModalProps) {
+export default function CompanyModal({ isOpen, onClose, onSave, onDelete, company }: CompanyModalProps) {
   const [formData, setFormData] = useState({
     name: '',
     industry: '',
@@ -381,20 +382,36 @@ export default function CompanyModal({ isOpen, onClose, onSave, company }: Compa
           </div>
 
           {/* ボタン */}
-          <div className="flex gap-3 justify-end pt-4 border-t border-gray-200">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-            >
-              キャンセル
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              {company ? '更新' : '追加'}
-            </button>
+          <div className="flex gap-3 justify-between pt-4 border-t border-gray-200">
+            {/* 削除ボタン（編集時のみ表示） */}
+            <div>
+              {company && onDelete && (
+                <button
+                  type="button"
+                  onClick={() => onDelete(company.id)}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  削除
+                </button>
+              )}
+            </div>
+
+            {/* キャンセル・保存ボタン */}
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                キャンセル
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                {company ? '更新' : '追加'}
+              </button>
+            </div>
           </div>
         </form>
       </div>
