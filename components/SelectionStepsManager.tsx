@@ -80,13 +80,13 @@ export default function SelectionStepsManager({ steps, onChange }: SelectionStep
                       type="text"
                       value={step.name}
                       onChange={(e) => handleUpdateStep(step.id, { name: e.target.value })}
-                      className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="flex-1 px-2 py-1 text-gray-900 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="ステップ名"
                     />
                     <select
                       value={step.status}
                       onChange={(e) => handleStatusChange(step.id, e.target.value as SelectionStep['status'])}
-                      className="px-2 py-1 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="px-2 py-1 text-gray-900 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="pending">未実施</option>
                       <option value="scheduled">実施予定</option>
@@ -103,59 +103,58 @@ export default function SelectionStepsManager({ steps, onChange }: SelectionStep
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     <div>
-                      <label className="block text-xs text-gray-600 mb-1">締切日</label>
+                      <label className="block text-sm font-medium text-gray-900 mb-1">締切日</label>
                       <input
-                        type="date"
-                        value={step.deadline ? format(step.deadline, 'yyyy-MM-dd') : ''}
+                        type="datetime-local"
+                        value={step.deadline ? format(step.deadline, "yyyy-MM-dd'T'HH:mm") : ''}
                         onChange={(e) =>
                           handleUpdateStep(step.id, {
                             deadline: e.target.value ? new Date(e.target.value) : undefined,
                           })
                         }
-                        className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-2 py-1 text-gray-900 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs text-gray-600 mb-1">実施予定日</label>
+                      <label className="block text-sm font-medium text-gray-900 mb-1">実施予定日</label>
                       <input
-                        type="date"
-                        value={step.scheduledDate ? format(step.scheduledDate, 'yyyy-MM-dd') : ''}
+                        type="datetime-local"
+                        value={step.scheduledDate ? format(step.scheduledDate, "yyyy-MM-dd'T'HH:mm") : ''}
                         onChange={(e) =>
                           handleUpdateStep(step.id, {
                             scheduledDate: e.target.value ? new Date(e.target.value) : undefined,
                           })
                         }
-                        className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-2 py-1 text-gray-900 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs text-gray-600 mb-1">完了日</label>
+                      <label className="block text-sm font-medium text-gray-900 mb-1">完了日</label>
                       <input
-                        type="date"
-                        value={step.completedDate ? format(step.completedDate, 'yyyy-MM-dd') : ''}
+                        type="datetime-local"
+                        value={step.completedDate ? format(step.completedDate, "yyyy-MM-dd'T'HH:mm") : ''}
                         onChange={(e) =>
                           handleUpdateStep(step.id, {
                             completedDate: e.target.value ? new Date(e.target.value) : undefined,
                           })
                         }
-                        className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-2 py-1 text-gray-900 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
                   </div>
 
-                  {step.notes !== undefined && (
-                    <div className="mt-2">
-                      <textarea
-                        value={step.notes}
-                        onChange={(e) => handleUpdateStep(step.id, { notes: e.target.value })}
-                        placeholder="メモ（面接の感想、質問内容など）"
-                        rows={2}
-                        className="w-full px-2 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-                  )}
+                  <div className="mt-2">
+                    <label className="block text-sm font-medium text-gray-900 mb-1">メモ</label>
+                    <textarea
+                      value={step.notes || ''}
+                      onChange={(e) => handleUpdateStep(step.id, { notes: e.target.value })}
+                      placeholder="面接の感想、質問内容など"
+                      rows={2}
+                      className="w-full px-2 py-1 text-gray-900 border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -171,7 +170,7 @@ export default function SelectionStepsManager({ steps, onChange }: SelectionStep
           onChange={(e) => setNewStepName(e.target.value)}
           onKeyPress={(e) => e.key === 'Enter' && handleAddStep()}
           placeholder="新しいステップを追加（例: 書類選考、一次面接）"
-          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-1 px-3 py-2 text-gray-900 placeholder:text-gray-500 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <button
           onClick={handleAddStep}

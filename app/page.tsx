@@ -7,6 +7,7 @@ import { STATUS_LABELS, STATUS_COLORS } from '@/types';
 import CompanyModal from '@/components/CompanyModal';
 import Calendar from '@/components/Calendar';
 import UpcomingEvents from '@/components/UpcomingEvents';
+import EventDetailModal from '@/components/EventDetailModal';
 import { loadCompanies, saveCompanies } from '@/lib/localStorage';
 
 export default function Home() {
@@ -17,6 +18,8 @@ export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<Company | undefined>(undefined);
   const [currentView, setCurrentView] = useState<'list' | 'calendar'>('list');
+  const [isEventModalOpen, setIsEventModalOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
 
   // 初回ロード時にローカルストレージからデータを読み込む
   useEffect(() => {
@@ -66,6 +69,20 @@ export default function Home() {
       setCompanies(companies.filter(c => c.id !== companyId));
       setIsModalOpen(false);
       setSelectedCompany(undefined);
+    }
+  };
+
+  const handleEventClick = (event: CalendarEvent) => {
+    setSelectedEvent(event);
+    setIsEventModalOpen(true);
+  };
+
+  const handleEditCompanyFromEvent = () => {
+    if (selectedEvent) {
+      const company = companies.find(c => c.id === selectedEvent.companyId);
+      if (company) {
+        handleEditCompany(company);
+      }
     }
   };
 
@@ -236,23 +253,13 @@ export default function Home() {
             <div className="lg:col-span-2">
               <Calendar
                 events={calendarEvents}
-                onEventClick={(event) => {
-                  const company = companies.find(c => c.id === event.companyId);
-                  if (company) {
-                    handleEditCompany(company);
-                  }
-                }}
+                onEventClick={handleEventClick}
               />
             </div>
             <div>
               <UpcomingEvents
                 events={calendarEvents}
-                onEventClick={(event) => {
-                  const company = companies.find(c => c.id === event.companyId);
-                  if (company) {
-                    handleEditCompany(company);
-                  }
-                }}
+                onEventClick={handleEventClick}
               />
             </div>
           </div>
@@ -348,6 +355,16 @@ export default function Home() {
         onSave={handleSaveCompany}
         onDelete={handleDeleteCompany}
         company={selectedCompany}
+      />
+
+      <EventDetailModal
+        isOpen={isEventModalOpen}
+        onClose={() => {
+          setIsEventModalOpen(false);
+          setSelectedEvent(null);
+        }}
+        event={selectedEvent}
+        onEditCompany={handleEditCompanyFromEvent}
       />
     </div>
   );
