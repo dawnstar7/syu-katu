@@ -22,8 +22,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Gemini Pro モデルを使用
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+    // Gemini 1.5 Flash モデルを使用（高速で無料枠が大きい）
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
     // プロンプトを構築
     const prompt = `
