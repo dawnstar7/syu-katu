@@ -1,10 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Plus, Search, Filter, Building2 } from 'lucide-react';
-import type { Company, SelectionStatus } from '@/types';
+import { useState, useEffect, useMemo } from 'react';
+import { Plus, Search, Filter, Building2, Calendar as CalendarIcon, List } from 'lucide-react';
+import type { Company, SelectionStatus, CalendarEvent } from '@/types';
 import { STATUS_LABELS, STATUS_COLORS } from '@/types';
 import CompanyModal from '@/components/CompanyModal';
+import Calendar from '@/components/Calendar';
+import UpcomingEvents from '@/components/UpcomingEvents';
 import { loadCompanies, saveCompanies } from '@/lib/localStorage';
 
 export default function Home() {
@@ -14,6 +16,7 @@ export default function Home() {
   const [filterStatus, setFilterStatus] = useState<SelectionStatus | 'all'>('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<Company | undefined>(undefined);
+  const [currentView, setCurrentView] = useState<'list' | 'calendar'>('list');
 
   // 初回ロード時にローカルストレージからデータを読み込む
   useEffect(() => {
@@ -74,6 +77,45 @@ export default function Home() {
     return matchesSearch && matchesStatus;
   });
 
+  // カレンダーイベントを生成
+  const calendarEvents = useMemo(() => {
+    const events: CalendarEvent[] = [];
+
+    companies.forEach(company => {
+      company.selectionSteps.forEach(step => {
+        // 締切日のイベント
+        if (step.deadline) {
+          events.push({
+            id: `${company.id}-${step.id}-deadline`,
+            companyId: company.id,
+            companyName: company.name,
+            title: `${step.name} 締切`,
+            date: new Date(step.deadline),
+            type: 'deadline',
+            stepId: step.id,
+            notes: step.notes,
+          });
+        }
+
+        // 実施予定日のイベント
+        if (step.scheduledDate) {
+          events.push({
+            id: `${company.id}-${step.id}-scheduled`,
+            companyId: company.id,
+            companyName: company.name,
+            title: step.name,
+            date: new Date(step.scheduledDate),
+            type: step.name.includes('面接') ? 'interview' : 'event',
+            stepId: step.id,
+            notes: step.notes,
+          });
+        }
+      });
+    });
+
+    return events;
+  }, [companies]);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* ヘッダー */}
@@ -96,8 +138,35 @@ export default function Home() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* 検索とフィルター */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
+        {/* ビュー切り替えタブ */}
+        <div className="flex gap-2 mb-6">
+          <button
+            onClick={() => setCurrentView('list')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+              currentView === 'list'
+                ? 'bg-blue-600 text-white'
+                : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+            }`}
+          >
+            <List className="w-5 h-5" />
+            企業リスト
+          </button>
+          <button
+            onClick={() => setCurrentView('calendar')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+              currentView === 'calendar'
+                ? 'bg-blue-600 text-white'
+                : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+            }`}
+          >
+            <CalendarIcon className="w-5 h-5" />
+            カレンダー
+          </button>
+        </div>
+
+        {/* 検索とフィルター（リストビューのみ） */}
+        {currentView === 'list' && (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
           <div className="flex flex-col sm:flex-row gap-4">
             {/* 検索バー */}
             <div className="flex-1 relative">
@@ -129,8 +198,10 @@ export default function Home() {
             </div>
           </div>
         </div>
+        )}
 
-        {/* 統計情報 */}
+        {/* 統計情報（リストビューのみ） */}
+        {currentView === 'list' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
             <p className="text-sm text-gray-600 mb-1">総企業数</p>
@@ -157,8 +228,38 @@ export default function Home() {
             </p>
           </div>
         </div>
+        )}
 
-        {/* 企業リスト */}
+        {/* カレンダービュー */}
+        {currentView === 'calendar' && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <Calendar
+                events={calendarEvents}
+                onEventClick={(event) => {
+                  const company = companies.find(c => c.id === event.companyId);
+                  if (company) {
+                    handleEditCompany(company);
+                  }
+                }}
+              />
+            </div>
+            <div>
+              <UpcomingEvents
+                events={calendarEvents}
+                onEventClick={(event) => {
+                  const company = companies.find(c => c.id === event.companyId);
+                  if (company) {
+                    handleEditCompany(company);
+                  }
+                }}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* 企業リスト（リストビューのみ） */}
+        {currentView === 'list' && (
         {filteredCompanies.length === 0 ? (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
             <Building2 className="w-16 h-16 text-gray-300 mx-auto mb-4" />
@@ -234,6 +335,7 @@ export default function Home() {
               </div>
             ))}
           </div>
+        )}
         )}
       </main>
 

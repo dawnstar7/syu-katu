@@ -90,3 +90,29 @@ export const STATUS_COLORS: Record<SelectionStatus, string> = {
   rejected: 'bg-red-100 text-red-700',
   declined: 'bg-gray-200 text-gray-600',
 };
+
+// カレンダーイベント型
+export interface CalendarEvent {
+  id: string;
+  companyId: string;
+  companyName: string;
+  title: string;
+  date: Date;
+  type: 'deadline' | 'interview' | 'event';
+  stepId?: string; // 選考ステップと紐付ける場合
+  notes?: string;
+}
+
+// イベントタイプの色
+export const EVENT_TYPE_COLORS: Record<CalendarEvent['type'], string> = {
+  deadline: 'bg-red-500',
+  interview: 'bg-blue-500',
+  event: 'bg-green-500',
+};
+
+// イベントタイプのラベル
+export const EVENT_TYPE_LABELS: Record<CalendarEvent['type'], string> = {
+  deadline: '締切',
+  interview: '面接',
+  event: 'イベント',
+};
