@@ -24,6 +24,72 @@ export interface SelectionStep {
   order: number; // 表示順序
 }
 
+// ES設問と回答
+export interface ESQuestion {
+  id: string;
+  question: string; // 設問内容
+  answer: string; // 回答内容
+  characterLimit?: number; // 文字数制限
+  order: number; // 表示順序
+}
+
+// 提出書類
+export interface SubmittedDocument {
+  id: string;
+  name: string; // ファイル名
+  type: string; // 種類（ES、履歴書、ポートフォリオなど）
+  submittedDate?: Date; // 提出日
+  notes?: string; // メモ
+}
+
+// 面接ログ
+export interface InterviewLog {
+  id: string;
+  round: string; // 面接回（一次面接、二次面接など）
+  date?: Date; // 面接日
+  interviewers: InterviewerInfo[]; // 面接官情報
+  questions: InterviewQuestion[]; // 質問と回答
+  reverseQuestions?: string; // 逆質問内容
+  impression?: string; // 全体の印象
+  result?: string; // 結果・フィードバック
+}
+
+// 面接官情報
+export interface InterviewerInfo {
+  id: string;
+  name?: string; // 名前
+  position?: string; // 役職
+  department?: string; // 部署
+  impression?: string; // 印象
+}
+
+// 面接質問
+export interface InterviewQuestion {
+  id: string;
+  question: string; // 質問内容
+  answer: string; // 自分の回答
+  reaction?: string; // 面接官の反応
+  order: number;
+}
+
+// 企業分析メモ
+export interface CompanyAnalysis {
+  whyThisCompany?: string; // なぜこの会社か
+  employeeImpression?: string; // 社員の印象
+  matchingPoints?: string; // 自分とのマッチ度
+  concerns?: string; // 懸念点・確認したいこと
+}
+
+// 事務管理情報
+export interface AdministrativeInfo {
+  myPageUrl?: string; // マイページURL
+  myPageId?: string; // マイページID
+  myPagePassword?: string; // マイページパスワード
+  contactEmail?: string; // 採用担当者メール
+  contactPhone?: string; // 採用担当者電話
+  contactName?: string; // 採用担当者名
+}
+
 // 企業情報
 export interface Company {
   id: string;
@@ -43,6 +109,20 @@ export interface Company {
   // 選考情報
   currentStatus: SelectionStatus; // 現在のステータス
   selectionSteps: SelectionStep[]; // 選考ステップ
+
+  // 提出書類・ES関連
+  esQuestions: ESQuestion[]; // ES設問と回答
+  submittedDocuments: SubmittedDocument[]; // 提出書類管理
+
+  // 選考プロセス記録
+  interviewLogs: InterviewLog[]; // 面接ログ
+  webTestType?: string; // Webテストの種類（SPI、玉手箱など）
+
+  // 企業分析
+  companyAnalysis: CompanyAnalysis; // 企業分析メモ
+
+  // 事務管理
+  administrativeInfo: AdministrativeInfo; // 事務管理情報
 
   // その他
   priority: 'high' | 'medium' | 'low'; // 優先度

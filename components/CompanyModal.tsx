@@ -1,10 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Sparkles } from 'lucide-react';
-import type { Company, SelectionStatus, SelectionStep } from '@/types';
+import { X, Sparkles, FileText, MessageSquare, Briefcase, Settings } from 'lucide-react';
+import type { Company, SelectionStatus, SelectionStep, ESQuestion, SubmittedDocument, InterviewLog, CompanyAnalysis, AdministrativeInfo } from '@/types';
 import { STATUS_LABELS } from '@/types';
 import SelectionStepsManager from './SelectionStepsManager';
+import ESManager from './ESManager';
+import InterviewLogManager from './InterviewLogManager';
+import CompanyAnalysisForm from './CompanyAnalysisForm';
+import AdministrativeInfoForm from './AdministrativeInfoForm';
 
 interface CompanyModalProps {
   isOpen: boolean;
@@ -14,7 +18,11 @@ interface CompanyModalProps {
   company?: Company;
 }
 
+type TabType = 'basic' | 'es' | 'interview' | 'analysis' | 'admin';
+
 export default function CompanyModal({ isOpen, onClose, onSave, onDelete, company }: CompanyModalProps) {
+  const [activeTab, setActiveTab] = useState<TabType>('basic');
+
   const [formData, setFormData] = useState({
     name: '',
     industry: '',
@@ -30,9 +38,16 @@ export default function CompanyModal({ isOpen, onClose, onSave, onDelete, compan
     priority: 'medium' as 'high' | 'medium' | 'low',
     favorite: false,
     notes: '',
+    webTestType: '',
   });
 
   const [selectionSteps, setSelectionSteps] = useState<SelectionStep[]>([]);
+  const [esQuestions, setEsQuestions] = useState<ESQuestion[]>([]);
+  const [submittedDocuments, setSubmittedDocuments] = useState<SubmittedDocument[]>([]);
+  const [interviewLogs, setInterviewLogs] = useState<InterviewLog[]>([]);
+  const [companyAnalysis, setCompanyAnalysis] = useState<CompanyAnalysis>({});
+  const [administrativeInfo, setAdministrativeInfo] = useState<AdministrativeInfo>({});
+
   const [isLoadingAI, setIsLoadingAI] = useState(false);
   const [aiError, setAiError] = useState<string | null>(null);
 
@@ -61,7 +76,7 @@ export default function CompanyModal({ isOpen, onClose, onSave, onDelete, compan
       // 取得したデータでフォームを更新（企業名は既に入力されているのでそのまま）
       setFormData((prev) => ({
         ...prev,
-        name: data.name || prev.name, // AIが正式名称を返した場合は更新
+        name: data.name || prev.name,
         industry: data.industry || prev.industry,
         employeeCount: data.employeeCount || prev.employeeCount,
         location: data.location || prev.location,
@@ -97,8 +112,14 @@ export default function CompanyModal({ isOpen, onClose, onSave, onDelete, compan
         priority: company.priority,
         favorite: company.favorite,
         notes: company.notes || '',
+        webTestType: company.webTestType || '',
       });
       setSelectionSteps(company.selectionSteps);
+      setEsQuestions(company.esQuestions || []);
+      setSubmittedDocuments(company.submittedDocuments || []);
+      setInterviewLogs(company.interviewLogs || []);
+      setCompanyAnalysis(company.companyAnalysis || {});
+      setAdministrativeInfo(company.administrativeInfo || {});
     } else {
       setFormData({
         name: '',
@@ -115,9 +136,16 @@ export default function CompanyModal({ isOpen, onClose, onSave, onDelete, compan
         priority: 'medium',
         favorite: false,
         notes: '',
+        webTestType: '',
       });
       setSelectionSteps([]);
+      setEsQuestions([]);
+      setSubmittedDocuments([]);
+      setInterviewLogs([]);
+      setCompanyAnalysis({});
+      setAdministrativeInfo({});
     }
+    setActiveTab('basic');
   }, [company, isOpen]);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -125,15 +153,28 @@ export default function CompanyModal({ isOpen, onClose, onSave, onDelete, compan
     onSave({
       ...formData,
       selectionSteps,
+      esQuestions,
+      submittedDocuments,
+      interviewLogs,
+      companyAnalysis,
+      administrativeInfo,
     });
     onClose();
   };
 
   if (!isOpen) return null;
 
+  const tabs = [
+    { id: 'basic' as TabType, label: '基本情報', icon: Briefcase },
+    { id: 'es' as TabType, label: 'ES・提出書類', icon: FileText },
+    { id: 'interview' as TabType, label: '面接・選考', icon: MessageSquare },
+    { id: 'analysis' as TabType, label: '企業分析', icon: Sparkles },
+    { id: 'admin' as TabType, label: '事務管理', icon: Settings },
+  ];
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg shadow-xl max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         {/* ヘッダー */}
         <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-blue-700 border-b border-blue-800 px-6 py-5 flex items-center justify-between rounded-t-lg">
           <h2 className="text-2xl font-bold text-white">
@@ -147,242 +188,307 @@ export default function CompanyModal({ isOpen, onClose, onSave, onDelete, compan
           </button>
         </div>
 
-        {/* フォーム */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* 基本情報 */}
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">基本情報</h3>
+        {/* タブナビゲーション */}
+        <div className="border-b border-gray-200 bg-gray-50">
+          <div className="flex overflow-x-auto">
+            {tabs.map((tab) => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-2 px-6 py-3 text-sm font-medium whitespace-nowrap transition-colors ${
+                    activeTab === tab.id
+                      ? 'text-blue-600 border-b-2 border-blue-600 bg-white'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
-            {/* AI自動収集バナー */}
-            {!company && (
-              <div className="mb-4 p-4 bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg">
-                <div className="flex items-start gap-3">
-                  <Sparkles className="w-5 h-5 text-purple-600 mt-0.5 flex-shrink-0" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-gray-900 mb-1">
-                      AI自動収集機能
-                    </p>
-                    <p className="text-xs text-gray-600 mb-3">
-                      企業名を入力して「AI自動入力」ボタンを押すと、AIが企業情報を自動で収集して入力します
-                    </p>
-                    <button
-                      type="button"
-                      onClick={() => fetchCompanyInfo(formData.name)}
-                      disabled={!formData.name.trim() || isLoadingAI}
-                      className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white text-sm rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <Sparkles className="w-4 h-4" />
-                      <span>{isLoadingAI ? 'AI処理中...' : 'AI自動入力'}</span>
-                    </button>
-                    {aiError && (
-                      <p className="text-xs text-red-600 mt-2">{aiError}</p>
-                    )}
+        {/* フォーム */}
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
+          <div className="p-6">
+            {/* 基本情報タブ */}
+            {activeTab === 'basic' && (
+              <div className="space-y-6">
+                {/* AI自動収集バナー */}
+                {!company && (
+                  <div className="p-4 bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <Sparkles className="w-5 h-5 text-purple-600 mt-0.5 flex-shrink-0" />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-900 mb-1">
+                          AI自動収集機能
+                        </p>
+                        <p className="text-xs text-gray-600 mb-3">
+                          企業名を入力して「AI自動入力」ボタンを押すと、AIが企業情報を自動で収集して入力します
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => fetchCompanyInfo(formData.name)}
+                          disabled={!formData.name.trim() || isLoadingAI}
+                          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white text-sm rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <Sparkles className="w-4 h-4" />
+                          <span>{isLoadingAI ? 'AI処理中...' : 'AI自動入力'}</span>
+                        </button>
+                        {aiError && (
+                          <p className="text-xs text-red-600 mt-2">{aiError}</p>
+                        )}
+                      </div>
+                    </div>
                   </div>
+                )}
+
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">企業情報</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="md:col-span-2">
+                      <label className="block text-base font-medium text-gray-900 mb-2">
+                        企業名 <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        disabled={isLoadingAI}
+                        className="w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                        placeholder="株式会社〇〇"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-base font-medium text-gray-900 mb-2">業界</label>
+                      <input
+                        type="text"
+                        value={formData.industry}
+                        onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
+                        disabled={isLoadingAI}
+                        className="w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                        placeholder="IT、製造業、金融など"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-base font-medium text-gray-900 mb-2">従業員数</label>
+                      <input
+                        type="text"
+                        value={formData.employeeCount}
+                        onChange={(e) => setFormData({ ...formData, employeeCount: e.target.value })}
+                        className="w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                        disabled={isLoadingAI}
+                        placeholder="100名、1000名以上など"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-base font-medium text-gray-900 mb-2">本社所在地</label>
+                      <input
+                        type="text"
+                        value={formData.location}
+                        onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                        className="w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                        disabled={isLoadingAI}
+                        placeholder="東京都渋谷区"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-base font-medium text-gray-900 mb-2">ホームページ</label>
+                      <input
+                        type="url"
+                        value={formData.website}
+                        onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+                        className="w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                        disabled={isLoadingAI}
+                        placeholder="https://example.com"
+                      />
+                    </div>
+
+                    <div className="md:col-span-2">
+                      <label className="block text-base font-medium text-gray-900 mb-2">企業説明</label>
+                      <textarea
+                        value={formData.description}
+                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        rows={3}
+                        className="w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                        disabled={isLoadingAI}
+                        placeholder="企業の特徴や事業内容など"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 募集要項 */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">募集要項</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-base font-medium text-gray-900 mb-2">職種</label>
+                      <input
+                        type="text"
+                        value={formData.jobType}
+                        onChange={(e) => setFormData({ ...formData, jobType: e.target.value })}
+                        className="w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                        disabled={isLoadingAI}
+                        placeholder="エンジニア、営業など"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-base font-medium text-gray-900 mb-2">給与</label>
+                      <input
+                        type="text"
+                        value={formData.salary}
+                        onChange={(e) => setFormData({ ...formData, salary: e.target.value })}
+                        className="w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                        disabled={isLoadingAI}
+                        placeholder="月給25万円〜など"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-base font-medium text-gray-900 mb-2">勤務地</label>
+                      <input
+                        type="text"
+                        value={formData.workLocation}
+                        onChange={(e) => setFormData({ ...formData, workLocation: e.target.value })}
+                        className="w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                        disabled={isLoadingAI}
+                        placeholder="東京都、大阪府など"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-base font-medium text-gray-900 mb-2">福利厚生</label>
+                      <input
+                        type="text"
+                        value={formData.benefits}
+                        onChange={(e) => setFormData({ ...formData, benefits: e.target.value })}
+                        className="w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                        disabled={isLoadingAI}
+                        placeholder="社会保険完備、リモートワーク可など"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 選考情報 */}
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">選考情報</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-base font-medium text-gray-900 mb-2">
+                        現在のステータス
+                      </label>
+                      <select
+                        value={formData.currentStatus}
+                        onChange={(e) => setFormData({ ...formData, currentStatus: e.target.value as SelectionStatus })}
+                        className="w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                        disabled={isLoadingAI}
+                      >
+                        {Object.entries(STATUS_LABELS).map(([value, label]) => (
+                          <option key={value} value={value}>
+                            {label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-base font-medium text-gray-900 mb-2">優先度</label>
+                      <select
+                        value={formData.priority}
+                        onChange={(e) => setFormData({ ...formData, priority: e.target.value as 'high' | 'medium' | 'low' })}
+                        className="w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                        disabled={isLoadingAI}
+                      >
+                        <option value="high">高</option>
+                        <option value="medium">中</option>
+                        <option value="low">低</option>
+                      </select>
+                    </div>
+
+                    <div className="md:col-span-2">
+                      <label className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={formData.favorite}
+                          onChange={(e) => setFormData({ ...formData, favorite: e.target.checked })}
+                          className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                        />
+                        <span className="text-base font-medium text-gray-900">お気に入り</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 選考ステップ */}
+                <div>
+                  <SelectionStepsManager steps={selectionSteps} onChange={setSelectionSteps} />
+                </div>
+
+                {/* メモ */}
+                <div>
+                  <label className="block text-base font-medium text-gray-900 mb-2">全体メモ</label>
+                  <textarea
+                    value={formData.notes}
+                    onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                    rows={4}
+                    className="w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="気になったことや選考対策のメモなど"
+                  />
                 </div>
               </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="md:col-span-2">
-                <label className="block text-base font-medium text-gray-900 mb-2">
-                  企業名 <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  disabled={isLoadingAI}
-                  className="w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-                  placeholder="株式会社〇〇"
-                />
-              </div>
+            {/* ES・提出書類タブ */}
+            {activeTab === 'es' && (
+              <ESManager
+                esQuestions={esQuestions}
+                onEsQuestionsChange={setEsQuestions}
+                submittedDocuments={submittedDocuments}
+                onSubmittedDocumentsChange={setSubmittedDocuments}
+              />
+            )}
 
-              <div>
-                <label className="block text-base font-medium text-gray-900 mb-2">業界</label>
-                <input
-                  type="text"
-                  value={formData.industry}
-                  onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
-                  disabled={isLoadingAI}
-                  className="w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
-                  placeholder="IT、製造業、金融など"
-                />
-              </div>
+            {/* 面接・選考タブ */}
+            {activeTab === 'interview' && (
+              <InterviewLogManager
+                interviewLogs={interviewLogs}
+                onInterviewLogsChange={setInterviewLogs}
+                webTestType={formData.webTestType}
+                onWebTestTypeChange={(value) => setFormData({ ...formData, webTestType: value })}
+              />
+            )}
 
-              <div>
-                <label className="block text-base font-medium text-gray-900 mb-2">従業員数</label>
-                <input
-                  type="text"
-                  value={formData.employeeCount}
-                  onChange={(e) => setFormData({ ...formData, employeeCount: e.target.value })}
-                  className="w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
-                  disabled={isLoadingAI}
-                  placeholder="100名、1000名以上など"
-                />
-              </div>
+            {/* 企業分析タブ */}
+            {activeTab === 'analysis' && (
+              <CompanyAnalysisForm
+                analysis={companyAnalysis}
+                onChange={setCompanyAnalysis}
+              />
+            )}
 
-              <div>
-                <label className="block text-base font-medium text-gray-900 mb-2">本社所在地</label>
-                <input
-                  type="text"
-                  value={formData.location}
-                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                  className="w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
-                  disabled={isLoadingAI}
-                  placeholder="東京都渋谷区"
-                />
-              </div>
-
-              <div>
-                <label className="block text-base font-medium text-gray-900 mb-2">ホームページ</label>
-                <input
-                  type="url"
-                  value={formData.website}
-                  onChange={(e) => setFormData({ ...formData, website: e.target.value })}
-                  className="w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
-                  disabled={isLoadingAI}
-                  placeholder="https://example.com"
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-base font-medium text-gray-900 mb-2">企業説明</label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  rows={3}
-                  className="w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
-                  disabled={isLoadingAI}
-                  placeholder="企業の特徴や事業内容など"
-                />
-              </div>
-            </div>
+            {/* 事務管理タブ */}
+            {activeTab === 'admin' && (
+              <AdministrativeInfoForm
+                info={administrativeInfo}
+                onChange={setAdministrativeInfo}
+              />
+            )}
           </div>
 
-          {/* 募集要項 */}
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">募集要項</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-base font-medium text-gray-900 mb-2">職種</label>
-                <input
-                  type="text"
-                  value={formData.jobType}
-                  onChange={(e) => setFormData({ ...formData, jobType: e.target.value })}
-                  className="w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
-                  disabled={isLoadingAI}
-                  placeholder="エンジニア、営業など"
-                />
-              </div>
-
-              <div>
-                <label className="block text-base font-medium text-gray-900 mb-2">給与</label>
-                <input
-                  type="text"
-                  value={formData.salary}
-                  onChange={(e) => setFormData({ ...formData, salary: e.target.value })}
-                  className="w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
-                  disabled={isLoadingAI}
-                  placeholder="月給25万円〜など"
-                />
-              </div>
-
-              <div>
-                <label className="block text-base font-medium text-gray-900 mb-2">勤務地</label>
-                <input
-                  type="text"
-                  value={formData.workLocation}
-                  onChange={(e) => setFormData({ ...formData, workLocation: e.target.value })}
-                  className="w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
-                  disabled={isLoadingAI}
-                  placeholder="東京都、大阪府など"
-                />
-              </div>
-
-              <div>
-                <label className="block text-base font-medium text-gray-900 mb-2">福利厚生</label>
-                <input
-                  type="text"
-                  value={formData.benefits}
-                  onChange={(e) => setFormData({ ...formData, benefits: e.target.value })}
-                  className="w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
-                  disabled={isLoadingAI}
-                  placeholder="社会保険完備、リモートワーク可など"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* 選考情報 */}
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">選考情報</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-base font-medium text-gray-900 mb-2">
-                  現在のステータス
-                </label>
-                <select
-                  value={formData.currentStatus}
-                  onChange={(e) => setFormData({ ...formData, currentStatus: e.target.value as SelectionStatus })}
-                  className="w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
-                  disabled={isLoadingAI}
-                >
-                  {Object.entries(STATUS_LABELS).map(([value, label]) => (
-                    <option key={value} value={value}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-base font-medium text-gray-900 mb-2">優先度</label>
-                <select
-                  value={formData.priority}
-                  onChange={(e) => setFormData({ ...formData, priority: e.target.value as 'high' | 'medium' | 'low' })}
-                  className="w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
-                  disabled={isLoadingAI}
-                >
-                  <option value="high">高</option>
-                  <option value="medium">中</option>
-                  <option value="low">低</option>
-                </select>
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={formData.favorite}
-                    onChange={(e) => setFormData({ ...formData, favorite: e.target.checked })}
-                    className="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                  />
-                  <span className="text-base font-medium text-gray-900">お気に入り</span>
-                </label>
-              </div>
-            </div>
-          </div>
-
-          {/* 選考ステップ */}
-          <div>
-            <SelectionStepsManager steps={selectionSteps} onChange={setSelectionSteps} />
-          </div>
-
-          {/* メモ */}
-          <div>
-            <label className="block text-base font-medium text-gray-900 mb-2">メモ</label>
-            <textarea
-              value={formData.notes}
-              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              rows={4}
-              className="w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="気になったことや選考対策のメモなど"
-            />
-          </div>
-
-          {/* ボタン */}
-          <div className="flex gap-3 justify-between pt-4 border-t border-gray-200">
+          {/* フッターボタン */}
+          <div className="sticky bottom-0 bg-white border-t border-gray-200 px-6 py-4 flex gap-3 justify-between">
             {/* 削除ボタン（編集時のみ表示） */}
             <div>
               {company && onDelete && (
