@@ -10,21 +10,46 @@ interface SelectionStepsManagerProps {
   onChange: (steps: SelectionStep[]) => void;
 }
 
+// よくある選考ステップのプリセット
+const PRESET_STEPS = [
+  'ES提出',
+  '書類選考',
+  'Webテスト',
+  '適性検査',
+  '説明会',
+  '一次面接',
+  '二次面接',
+  '三次面接',
+  '最終面接',
+  'グループディスカッション',
+  'インターンシップ',
+  'OB・OG訪問',
+  'ケース面接',
+  '技術面接',
+  '役員面接',
+];
+
 export default function SelectionStepsManager({ steps, onChange }: SelectionStepsManagerProps) {
   const [newStepName, setNewStepName] = useState('');
+  const [showPresets, setShowPresets] = useState(true);
 
-  const handleAddStep = () => {
-    if (!newStepName.trim()) return;
+  const handleAddStep = (stepName?: string) => {
+    const name = stepName || newStepName;
+    if (!name.trim()) return;
 
     const newStep: SelectionStep = {
       id: Date.now().toString(),
-      name: newStepName,
+      name: name,
       status: 'pending',
       order: steps.length,
     };
 
     onChange([...steps, newStep]);
     setNewStepName('');
+  };
+
+  const handleAddPresetStep = (presetName: string) => {
+    handleAddStep(presetName);
   };
 
   const handleDeleteStep = (stepId: string) => {
@@ -50,7 +75,35 @@ export default function SelectionStepsManager({ steps, onChange }: SelectionStep
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-gray-900">選考ステップ</h3>
+        {steps.length === 0 && (
+          <button
+            type="button"
+            onClick={() => setShowPresets(!showPresets)}
+            className="text-sm text-blue-600 hover:text-blue-700"
+          >
+            {showPresets ? 'プリセットを隠す' : 'プリセットを表示'}
+          </button>
+        )}
       </div>
+
+      {/* プリセットボタン（ステップが0件の時のみ表示） */}
+      {steps.length === 0 && showPresets && (
+        <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+          <p className="text-sm font-medium text-gray-900 mb-3">よく使われる選考ステップ</p>
+          <div className="flex flex-wrap gap-2">
+            {PRESET_STEPS.map((preset) => (
+              <button
+                key={preset}
+                type="button"
+                onClick={() => handleAddPresetStep(preset)}
+                className="px-3 py-1.5 text-sm bg-white border border-blue-300 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors"
+              >
+                + {preset}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* 既存のステップ */}
       {sortedSteps.length > 0 && (
@@ -163,22 +216,56 @@ export default function SelectionStepsManager({ steps, onChange }: SelectionStep
       )}
 
       {/* 新しいステップを追加 */}
-      <div className="flex gap-2">
-        <input
-          type="text"
-          value={newStepName}
-          onChange={(e) => setNewStepName(e.target.value)}
-          onKeyPress={(e) => e.key === 'Enter' && handleAddStep()}
-          placeholder="新しいステップを追加（例: 書類選考、一次面接）"
-          className="flex-1 px-3 py-2 text-gray-900 placeholder:text-gray-500 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <button
-          onClick={handleAddStep}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          <span>追加</span>
-        </button>
+      <div className="space-y-2">
+        {/* プリセット選択（ステップがある場合） */}
+        {steps.length > 0 && (
+          <div>
+            <label className="block text-sm font-medium text-gray-900 mb-2">
+              プリセットから追加
+            </label>
+            <select
+              onChange={(e) => {
+                if (e.target.value) {
+                  handleAddPresetStep(e.target.value);
+                  e.target.value = '';
+                }
+              }}
+              className="w-full px-3 py-2 text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="">選択してください</option>
+              {PRESET_STEPS.map((preset) => (
+                <option key={preset} value={preset}>
+                  {preset}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {/* 手動入力 */}
+        <div>
+          <label className="block text-sm font-medium text-gray-900 mb-2">
+            カスタムステップを追加
+          </label>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={newStepName}
+              onChange={(e) => setNewStepName(e.target.value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleAddStep()}
+              placeholder="例: 書類選考、一次面接"
+              className="flex-1 px-3 py-2 text-gray-900 placeholder:text-gray-500 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+              type="button"
+              onClick={() => handleAddStep()}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <Plus className="w-4 h-4" />
+              <span>追加</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
