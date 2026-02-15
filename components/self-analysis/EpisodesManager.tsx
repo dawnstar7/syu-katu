@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, Trash2, Edit2, ChevronDown, ChevronUp, Tag } from 'lucide-react';
+import { Plus, Trash2, Edit2, ChevronDown, ChevronUp, Tag, Lightbulb } from 'lucide-react';
 import type { SelfAnalysisEpisode } from '@/types';
 import { EPISODE_CATEGORY_LABELS } from '@/types';
 
