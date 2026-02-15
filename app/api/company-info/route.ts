@@ -22,9 +22,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Gemini 1.5 Flash モデルを使用（高速で無料枠が大きい）
+    // Gemini 2.5 Flash モデルを使用（2026年現在の最新モデル）
     const model = genAI.getGenerativeModel({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.5-flash',
       generationConfig: {
         temperature: 0.7,
       }
