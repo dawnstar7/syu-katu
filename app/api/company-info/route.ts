@@ -23,7 +23,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Gemini 1.5 Flash モデルを使用（高速で無料枠が大きい）
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
+    const model = genAI.getGenerativeModel({
+      model: 'gemini-1.5-flash',
+      generationConfig: {
+        temperature: 0.7,
+      }
+    });
 
     // プロンプトを構築
     const prompt = `
