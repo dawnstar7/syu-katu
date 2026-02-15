@@ -192,7 +192,7 @@ export default function CompanyModal({ isOpen, onClose, onSave, company }: Compa
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   disabled={isLoadingAI}
-                  className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                  className="w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
                   placeholder="株式会社〇〇"
                 />
               </div>
@@ -204,7 +204,7 @@ export default function CompanyModal({ isOpen, onClose, onSave, company }: Compa
                   value={formData.industry}
                   onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
                   disabled={isLoadingAI}
-                  className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                  className="w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
                   placeholder="IT、製造業、金融など"
                 />
               </div>
@@ -215,7 +215,7 @@ export default function CompanyModal({ isOpen, onClose, onSave, company }: Compa
                   type="text"
                   value={formData.employeeCount}
                   onChange={(e) => setFormData({ ...formData, employeeCount: e.target.value })}
-                  className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                  className="w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
                   disabled={isLoadingAI}
                   placeholder="100名、1000名以上など"
                 />
@@ -227,7 +227,7 @@ export default function CompanyModal({ isOpen, onClose, onSave, company }: Compa
                   type="text"
                   value={formData.location}
                   onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                  className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                  className="w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
                   disabled={isLoadingAI}
                   placeholder="東京都渋谷区"
                 />
@@ -239,7 +239,7 @@ export default function CompanyModal({ isOpen, onClose, onSave, company }: Compa
                   type="url"
                   value={formData.website}
                   onChange={(e) => setFormData({ ...formData, website: e.target.value })}
-                  className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                  className="w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
                   disabled={isLoadingAI}
                   placeholder="https://example.com"
                 />
@@ -251,7 +251,7 @@ export default function CompanyModal({ isOpen, onClose, onSave, company }: Compa
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   rows={3}
-                  className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                  className="w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
                   disabled={isLoadingAI}
                   placeholder="企業の特徴や事業内容など"
                 />
@@ -269,7 +269,7 @@ export default function CompanyModal({ isOpen, onClose, onSave, company }: Compa
                   type="text"
                   value={formData.jobType}
                   onChange={(e) => setFormData({ ...formData, jobType: e.target.value })}
-                  className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                  className="w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
                   disabled={isLoadingAI}
                   placeholder="エンジニア、営業など"
                 />
@@ -281,7 +281,7 @@ export default function CompanyModal({ isOpen, onClose, onSave, company }: Compa
                   type="text"
                   value={formData.salary}
                   onChange={(e) => setFormData({ ...formData, salary: e.target.value })}
-                  className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                  className="w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
                   disabled={isLoadingAI}
                   placeholder="月給25万円〜など"
                 />
@@ -293,7 +293,7 @@ export default function CompanyModal({ isOpen, onClose, onSave, company }: Compa
                   type="text"
                   value={formData.workLocation}
                   onChange={(e) => setFormData({ ...formData, workLocation: e.target.value })}
-                  className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                  className="w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
                   disabled={isLoadingAI}
                   placeholder="東京都、大阪府など"
                 />
@@ -305,7 +305,7 @@ export default function CompanyModal({ isOpen, onClose, onSave, company }: Compa
                   type="text"
                   value={formData.benefits}
                   onChange={(e) => setFormData({ ...formData, benefits: e.target.value })}
-                  className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                  className="w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
                   disabled={isLoadingAI}
                   placeholder="社会保険完備、リモートワーク可など"
                 />
@@ -324,7 +324,7 @@ export default function CompanyModal({ isOpen, onClose, onSave, company }: Compa
                 <select
                   value={formData.currentStatus}
                   onChange={(e) => setFormData({ ...formData, currentStatus: e.target.value as SelectionStatus })}
-                  className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                  className="w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
                   disabled={isLoadingAI}
                 >
                   {Object.entries(STATUS_LABELS).map(([value, label]) => (
@@ -340,7 +340,7 @@ export default function CompanyModal({ isOpen, onClose, onSave, company }: Compa
                 <select
                   value={formData.priority}
                   onChange={(e) => setFormData({ ...formData, priority: e.target.value as 'high' | 'medium' | 'low' })}
-                  className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                  className="w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
                   disabled={isLoadingAI}
                 >
                   <option value="high">高</option>
@@ -375,7 +375,7 @@ export default function CompanyModal({ isOpen, onClose, onSave, company }: Compa
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               rows={4}
-              className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-3 text-base text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="気になったことや選考対策のメモなど"
             />
           </div>
