@@ -1,9 +1,9 @@
 // Firebase設定ファイル
 // Firebaseコンソールで取得した設定情報を.env.localに設定してください
 
-import { initializeApp, getApps } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
+import { initializeApp, getApps, FirebaseApp } from 'firebase/app';
+import { getFirestore, Firestore } from 'firebase/firestore';
+import { getAuth, Auth } from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -14,10 +14,27 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Firebaseアプリの初期化（複数回初期化されないようにチェック）
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+// Firebase環境変数が設定されているかチェック
+const isFirebaseConfigured = () => {
+  return !!(
+    firebaseConfig.apiKey &&
+    firebaseConfig.authDomain &&
+    firebaseConfig.projectId
+  );
+};
+
+// Firebaseアプリの初期化（環境変数が設定されている場合のみ）
+let app: FirebaseApp | null = null;
+let db: Firestore | null = null;
+let auth: Auth | null = null;
+
+if (typeof window !== 'undefined' && isFirebaseConfigured()) {
+  // クライアントサイドでFirebase設定が有効な場合のみ初期化
+  app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+  db = getFirestore(app);
+  auth = getAuth(app);
+}
 
 // FirestoreとAuthのインスタンスをエクスポート
-export const db = getFirestore(app);
-export const auth = getAuth(app);
+export { app, db, auth };
 export default app;

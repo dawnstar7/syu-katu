@@ -9,6 +9,7 @@ import CompanyModal from '@/components/CompanyModal';
 import Calendar from '@/components/Calendar';
 import UpcomingEvents from '@/components/UpcomingEvents';
 import EventDetailModal from '@/components/EventDetailModal';
+import AuthButton from '@/components/AuthButton';
 import { loadCompanies, saveCompanies } from '@/lib/localStorage';
 import { format } from 'date-fns';
 
@@ -146,19 +147,20 @@ export default function Home() {
               <h1 className="text-2xl font-bold text-gray-900">就活管理</h1>
             </div>
             <div className="flex items-center gap-3">
+              <AuthButton />
               <Link
                 href="/self-analysis"
                 className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
               >
                 <Lightbulb className="w-5 h-5" />
-                <span>自己分析</span>
+                <span className="hidden sm:inline">自己分析</span>
               </Link>
               <button
                 onClick={handleAddCompany}
                 className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
               >
                 <Plus className="w-5 h-5" />
-                <span>企業を追加</span>
+                <span className="hidden sm:inline">企業を追加</span>
               </button>
             </div>
           </div>
