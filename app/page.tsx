@@ -10,10 +10,12 @@ import Calendar from '@/components/Calendar';
 import UpcomingEvents from '@/components/UpcomingEvents';
 import EventDetailModal from '@/components/EventDetailModal';
 import AuthButton from '@/components/AuthButton';
-import { loadCompanies, saveCompanies } from '@/lib/localStorage';
+import { useAuth } from '@/contexts/AuthContext';
+import { getCompanies, saveCompany, deleteCompany as deleteCompanyFromFirestore } from '@/lib/firestore';
 import { format } from 'date-fns';
 
 export default function Home() {
+  const { user, loading: authLoading } = useAuth();
   const [companies, setCompanies] = useState<Company[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -24,37 +26,63 @@ export default function Home() {
   const [isEventModalOpen, setIsEventModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
 
-  // 初回ロード時にローカルストレージからデータを読み込む
+  // Firestoreからデータを読み込む
   useEffect(() => {
-    const loadedCompanies = loadCompanies();
-    setCompanies(loadedCompanies);
-    setIsLoaded(true);
-  }, []);
+    const loadData = async () => {
+      if (!user) {
+        setCompanies([]);
+        setIsLoaded(true);
+        return;
+      }
 
-  // companiesが変更されたら保存（初回ロード時を除く）
-  useEffect(() => {
-    if (isLoaded) {
-      saveCompanies(companies);
-    }
-  }, [companies, isLoaded]);
+      try {
+        const loadedCompanies = await getCompanies(user.uid);
+        setCompanies(loadedCompanies);
+      } catch (error) {
+        console.error('データの読み込みに失敗しました:', error);
+      } finally {
+        setIsLoaded(true);
+      }
+    };
 
-  const handleSaveCompany = (companyData: Omit<Company, 'id' | 'createdAt' | 'updatedAt'>) => {
-    if (selectedCompany) {
-      setCompanies(companies.map(c =>
-        c.id === selectedCompany.id
-          ? { ...companyData, id: selectedCompany.id, createdAt: selectedCompany.createdAt, updatedAt: new Date() }
-          : c
-      ));
-    } else {
-      const newCompany: Company = {
-        ...companyData,
-        id: Date.now().toString(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-      setCompanies([...companies, newCompany]);
+    if (!authLoading) {
+      loadData();
     }
-    setSelectedCompany(undefined);
+  }, [user, authLoading]);
+
+  const handleSaveCompany = async (companyData: Omit<Company, 'id' | 'createdAt' | 'updatedAt'>) => {
+    if (!user) return;
+
+    try {
+      let updatedCompany: Company;
+
+      if (selectedCompany) {
+        // 既存企業の更新
+        updatedCompany = {
+          ...companyData,
+          id: selectedCompany.id,
+          createdAt: selectedCompany.createdAt,
+          updatedAt: new Date(),
+        };
+        await saveCompany(user.uid, updatedCompany);
+        setCompanies(companies.map(c => c.id === selectedCompany.id ? updatedCompany : c));
+      } else {
+        // 新規企業の追加
+        updatedCompany = {
+          ...companyData,
+          id: Date.now().toString(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+        await saveCompany(user.uid, updatedCompany);
+        setCompanies([...companies, updatedCompany]);
+      }
+
+      setSelectedCompany(undefined);
+    } catch (error) {
+      console.error('保存に失敗しました:', error);
+      alert('保存に失敗しました。もう一度お試しください。');
+    }
   };
 
   const handleAddCompany = () => {
@@ -67,11 +95,19 @@ export default function Home() {
     setIsModalOpen(true);
   };
 
-  const handleDeleteCompany = (companyId: string) => {
+  const handleDeleteCompany = async (companyId: string) => {
+    if (!user) return;
+
     if (window.confirm('この企業を削除してもよろしいですか？')) {
-      setCompanies(companies.filter(c => c.id !== companyId));
-      setIsModalOpen(false);
-      setSelectedCompany(undefined);
+      try {
+        await deleteCompanyFromFirestore(user.uid, companyId);
+        setCompanies(companies.filter(c => c.id !== companyId));
+        setIsModalOpen(false);
+        setSelectedCompany(undefined);
+      } catch (error) {
+        console.error('削除に失敗しました:', error);
+        alert('削除に失敗しました。もう一度お試しください。');
+      }
     }
   };
 
@@ -135,6 +171,56 @@ export default function Home() {
 
     return events;
   }, [companies]);
+
+  // ログイン画面
+  if (!authLoading && !user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
+          <div className="text-center mb-8">
+            <Building2 className="w-16 h-16 text-blue-600 mx-auto mb-4" />
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">就活管理アプリ</h1>
+            <p className="text-gray-600">
+              就職活動を効率的に管理しましょう
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <div className="bg-blue-50 rounded-lg p-4">
+              <h2 className="font-semibold text-gray-900 mb-2">📊 主な機能</h2>
+              <ul className="text-sm text-gray-700 space-y-1">
+                <li>• 企業情報の一括管理</li>
+                <li>• 選考ステップの進捗管理</li>
+                <li>• カレンダーでスケジュール確認</li>
+                <li>• AI自己分析コーチ</li>
+              </ul>
+            </div>
+
+            <div className="pt-4">
+              <AuthButton />
+            </div>
+
+            <p className="text-xs text-gray-500 text-center mt-4">
+              ログインすることで、すべてのデバイスから<br />
+              データにアクセスできます
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ローディング画面
+  if (authLoading || !isLoaded) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Building2 className="w-16 h-16 text-blue-600 mx-auto mb-4 animate-pulse" />
+          <p className="text-gray-600">読み込み中...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">

@@ -22,11 +22,7 @@ export default function AdministrativeInfoForm({ info, onChange }: Administrativ
 
         <div className="space-y-4">
           {/* マイページ情報 */}
-          <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <p className="text-xs text-yellow-800 mb-3">
-              ⚠️ パスワード情報はブラウザのローカルストレージに保存されます。重要な情報の管理には十分ご注意ください。
-            </p>
-
+          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <div className="space-y-3">
               <div>
                 <label className="block text-sm font-medium text-gray-900 mb-1">
