@@ -1,14 +1,17 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, Trash2, FileText } from 'lucide-react';
-import type { ESQuestion, SubmittedDocument } from '@/types';
+import { Plus, Trash2, FileText, Sparkles } from 'lucide-react';
+import type { ESQuestion, SubmittedDocument, SelfAnalysisData, Company } from '@/types';
+import ESGenerator from './ESGenerator';
 
 interface ESManagerProps {
   esQuestions: ESQuestion[];
   onEsQuestionsChange: (questions: ESQuestion[]) => void;
   submittedDocuments: SubmittedDocument[];
   onSubmittedDocumentsChange: (documents: SubmittedDocument[]) => void;
+  selfAnalysis?: SelfAnalysisData;
+  company?: Partial<Company>;
 }
 
 export default function ESManager({
@@ -16,10 +19,13 @@ export default function ESManager({
   onEsQuestionsChange,
   submittedDocuments,
   onSubmittedDocumentsChange,
+  selfAnalysis,
+  company,
 }: ESManagerProps) {
   const [newQuestion, setNewQuestion] = useState('');
   const [newAnswer, setNewAnswer] = useState('');
   const [newCharLimit, setNewCharLimit] = useState('');
+  const [showGenerator, setShowGenerator] = useState(false);
 
   const [newDocName, setNewDocName] = useState('');
   const [newDocType, setNewDocType] = useState('');
@@ -67,11 +73,45 @@ export default function ESManager({
     onSubmittedDocumentsChange(submittedDocuments.filter((d) => d.id !== id));
   };
 
+  const handleUseGenerated = (text: string) => {
+    setNewAnswer(text);
+    setShowGenerator(false);
+    // 新規設問追加フォームまでスクロール
+    document.getElementById('es-question-input')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <div className="space-y-6">
       {/* ES設問と回答 */}
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">ES設問と回答</h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-gray-900">ES設問と回答</h3>
+          {selfAnalysis && (
+            <button
+              type="button"
+              onClick={() => setShowGenerator(!showGenerator)}
+              className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg border transition-colors ${
+                showGenerator
+                  ? 'bg-purple-600 text-white border-purple-600'
+                  : 'border-purple-400 text-purple-700 hover:bg-purple-50'
+              }`}
+            >
+              <Sparkles className="w-4 h-4" />
+              AIでES生成
+            </button>
+          )}
+        </div>
+
+        {/* AIジェネレーター */}
+        {showGenerator && selfAnalysis && company && (
+          <div className="mb-6 p-4 border border-purple-200 rounded-lg bg-purple-50/30">
+            <ESGenerator
+              company={company}
+              selfAnalysis={selfAnalysis}
+              onUseGenerated={handleUseGenerated}
+            />
+          </div>
+        )}
 
         {/* 既存の設問リスト */}
         {esQuestions.length > 0 && (
@@ -106,7 +146,7 @@ export default function ESManager({
         )}
 
         {/* 新規設問追加フォーム */}
-        <div className="p-4 border border-blue-200 rounded-lg bg-blue-50">
+        <div id="es-question-input" className="p-4 border border-blue-200 rounded-lg bg-blue-50">
           <div className="space-y-3">
             <div>
               <label className="block text-sm font-medium text-gray-900 mb-1">

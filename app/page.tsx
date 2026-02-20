@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Plus, Search, Filter, Building2, Calendar as CalendarIcon, List, Lightbulb } from 'lucide-react';
 import Link from 'next/link';
-import type { Company, SelectionStatus, CalendarEvent } from '@/types';
+import type { Company, SelectionStatus, CalendarEvent, SelfAnalysisData } from '@/types';
 import { STATUS_LABELS, STATUS_COLORS } from '@/types';
 import CompanyModal from '@/components/CompanyModal';
 import Calendar from '@/components/Calendar';
@@ -17,6 +17,13 @@ import { format } from 'date-fns';
 export default function Home() {
   const { user, loading: authLoading } = useAuth();
   const [companies, setCompanies] = useState<Company[]>([]);
+  const [selfAnalysis, setSelfAnalysis] = useState<SelfAnalysisData>({
+    episodes: [],
+    values: null,
+    strengths: [],
+    weaknesses: [],
+    vision: null,
+  });
   const [isLoaded, setIsLoaded] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<SelectionStatus | 'all'>('all');
@@ -49,6 +56,18 @@ export default function Home() {
       loadData();
     }
   }, [user, authLoading]);
+
+  // 自己分析データをLocalStorageから読み込む
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('selfAnalysisData');
+      if (saved) {
+        setSelfAnalysis(JSON.parse(saved));
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
 
   const handleSaveCompany = async (companyData: Omit<Company, 'id' | 'createdAt' | 'updatedAt'>) => {
     if (!user) return;
@@ -453,6 +472,7 @@ export default function Home() {
         onSave={handleSaveCompany}
         onDelete={handleDeleteCompany}
         company={selectedCompany}
+        selfAnalysis={selfAnalysis}
       />
 
       <EventDetailModal

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { X, Sparkles, FileText, MessageSquare, Briefcase, Settings } from 'lucide-react';
-import type { Company, SelectionStatus, SelectionStep, ESQuestion, SubmittedDocument, InterviewLog, CompanyAnalysis, AdministrativeInfo } from '@/types';
+import type { Company, SelectionStatus, SelectionStep, ESQuestion, SubmittedDocument, InterviewLog, CompanyAnalysis, AdministrativeInfo, SelfAnalysisData } from '@/types';
 import { STATUS_LABELS } from '@/types';
 import SelectionStepsManager from './SelectionStepsManager';
 import ESManager from './ESManager';
@@ -16,11 +16,12 @@ interface CompanyModalProps {
   onSave: (company: Omit<Company, 'id' | 'createdAt' | 'updatedAt'>) => void;
   onDelete?: (companyId: string) => void;
   company?: Company;
+  selfAnalysis?: SelfAnalysisData;
 }
 
 type TabType = 'basic' | 'es' | 'interview' | 'analysis' | 'admin';
 
-export default function CompanyModal({ isOpen, onClose, onSave, onDelete, company }: CompanyModalProps) {
+export default function CompanyModal({ isOpen, onClose, onSave, onDelete, company, selfAnalysis }: CompanyModalProps) {
   const [activeTab, setActiveTab] = useState<TabType>('basic');
 
   const [formData, setFormData] = useState({
@@ -457,6 +458,8 @@ export default function CompanyModal({ isOpen, onClose, onSave, onDelete, compan
                 onEsQuestionsChange={setEsQuestions}
                 submittedDocuments={submittedDocuments}
                 onSubmittedDocumentsChange={setSubmittedDocuments}
+                selfAnalysis={selfAnalysis}
+                company={{ ...formData, companyAnalysis, selectionSteps, esQuestions, submittedDocuments, interviewLogs, administrativeInfo }}
               />
             )}
 
