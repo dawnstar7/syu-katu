@@ -12,6 +12,7 @@ import EventDetailModal from '@/components/EventDetailModal';
 import AuthButton from '@/components/AuthButton';
 import { useAuth } from '@/contexts/AuthContext';
 import { getCompanies, saveCompany, deleteCompany as deleteCompanyFromFirestore } from '@/lib/firestore';
+import { loadSelfAnalysisData } from '@/lib/selfAnalysisStorage';
 import { format } from 'date-fns';
 
 export default function Home() {
@@ -58,16 +59,10 @@ export default function Home() {
     }
   }, [user, authLoading]);
 
-  // 自己分析データをLocalStorageから読み込む
+  // 自己分析データをLocalStorageから読み込む（selfAnalysisStorageと同じキーを使用）
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem('selfAnalysisData');
-      if (saved) {
-        setSelfAnalysis(JSON.parse(saved));
-      }
-    } catch {
-      // ignore
-    }
+    const data = loadSelfAnalysisData();
+    setSelfAnalysis(data);
   }, []);
 
   const handleSaveCompany = async (companyData: Omit<Company, 'id' | 'createdAt' | 'updatedAt'>) => {
