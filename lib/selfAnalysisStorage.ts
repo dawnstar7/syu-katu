@@ -9,6 +9,7 @@ const getInitialSelfAnalysisData = (): SelfAnalysisData => ({
   strengths: [],
   weaknesses: [],
   vision: null,
+  freeNotes: [],
 });
 
 // 自己分析データを読み込む
@@ -53,6 +54,13 @@ export const loadSelfAnalysisData = (): SelfAnalysisData => {
       data.vision.createdAt = new Date(data.vision.createdAt);
       data.vision.updatedAt = new Date(data.vision.updatedAt);
     }
+
+    // freeNotesの復元（既存データには存在しない場合がある）
+    data.freeNotes = (data.freeNotes || []).map((note: any) => ({
+      ...note,
+      createdAt: new Date(note.createdAt),
+      updatedAt: new Date(note.updatedAt),
+    }));
 
     return data;
   } catch (error) {

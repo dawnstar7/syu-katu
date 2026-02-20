@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Lightbulb, Sparkles, Target, TrendingUp, MessageCircle, ArrowLeft } from 'lucide-react';
+import { Lightbulb, Sparkles, Target, TrendingUp, StickyNote, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import type { SelfAnalysisData } from '@/types';
 import { loadSelfAnalysisData, saveSelfAnalysisData } from '@/lib/selfAnalysisStorage';
@@ -9,9 +9,9 @@ import EpisodesManager from '@/components/self-analysis/EpisodesManager';
 import ValuesManager from '@/components/self-analysis/ValuesManager';
 import StrengthsManager from '@/components/self-analysis/StrengthsManager';
 import VisionManager from '@/components/self-analysis/VisionManager';
-import AICoachChat from '@/components/self-analysis/AICoachChat';
+import FreeNotesManager from '@/components/self-analysis/FreeNotesManager';
 
-type TabType = 'episodes' | 'values' | 'strengths' | 'vision' | 'ai-coach';
+type TabType = 'episodes' | 'values' | 'strengths' | 'vision' | 'free-notes';
 
 export default function SelfAnalysisPage() {
   const [activeTab, setActiveTab] = useState<TabType>('episodes');
@@ -21,6 +21,7 @@ export default function SelfAnalysisPage() {
     strengths: [],
     weaknesses: [],
     vision: null,
+    freeNotes: [],
   });
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -43,7 +44,7 @@ export default function SelfAnalysisPage() {
     { id: 'values' as TabType, label: '価値観', icon: Sparkles, description: 'モチベーション・人生の軸' },
     { id: 'strengths' as TabType, label: '強み・弱み', icon: TrendingUp, description: '具体的な根拠とセット' },
     { id: 'vision' as TabType, label: '将来ビジョン', icon: Target, description: 'キャリアプラン' },
-    { id: 'ai-coach' as TabType, label: 'AIコーチ', icon: MessageCircle, description: '対話で自己分析を深める' },
+    { id: 'free-notes' as TabType, label: '自由メモ', icon: StickyNote, description: '思考・気づき・何でも' },
   ];
 
   return (
@@ -140,8 +141,13 @@ export default function SelfAnalysisPage() {
             />
           )}
 
-          {activeTab === 'ai-coach' && (
-            <AICoachChat selfAnalysisData={selfAnalysisData} />
+          {activeTab === 'free-notes' && (
+            <FreeNotesManager
+              notes={selfAnalysisData.freeNotes || []}
+              onChange={(freeNotes) =>
+                setSelfAnalysisData({ ...selfAnalysisData, freeNotes })
+              }
+            />
           )}
         </div>
       </main>

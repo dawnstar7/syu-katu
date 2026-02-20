@@ -23,6 +23,7 @@ export default function Home() {
     strengths: [],
     weaknesses: [],
     vision: null,
+    freeNotes: [],
   });
   const [isLoaded, setIsLoaded] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');

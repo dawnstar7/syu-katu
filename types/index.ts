@@ -247,6 +247,17 @@ export interface FutureVision {
   updatedAt: Date;
 }
 
+// 自由メモノート
+export interface FreeNote {
+  id: string;
+  title: string; // メモタイトル
+  content: string; // メモ内容（自由記述）
+  tags: string[]; // タグ（任意）
+  color: 'white' | 'yellow' | 'blue' | 'green' | 'pink'; // カード色
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // 自己分析データ全体
 export interface SelfAnalysisData {
   episodes: SelfAnalysisEpisode[]; // エピソード集
@@ -254,6 +265,7 @@ export interface SelfAnalysisData {
   strengths: StrengthAndWeakness[]; // 強み
   weaknesses: StrengthAndWeakness[]; // 弱み
   vision: FutureVision | null; // 将来ビジョン
+  freeNotes: FreeNote[]; // 自由メモ
 }
 
 // ES生成リクエスト
