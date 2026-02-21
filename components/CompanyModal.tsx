@@ -478,6 +478,7 @@ export default function CompanyModal({ isOpen, onClose, onSave, onDelete, compan
               <CompanyAnalysisForm
                 analysis={companyAnalysis}
                 onChange={setCompanyAnalysis}
+                companyName={formData.name}
               />
             )}
 

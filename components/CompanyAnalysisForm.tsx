@@ -1,17 +1,58 @@
 'use client';
 
+import { useState } from 'react';
+import { Search, ChevronDown, ChevronUp } from 'lucide-react';
 import type { CompanyAnalysis } from '@/types';
+import CompanyResearch from './CompanyResearch';
 
 interface CompanyAnalysisFormProps {
   analysis: CompanyAnalysis;
   onChange: (analysis: CompanyAnalysis) => void;
+  companyName?: string;
 }
 
-export default function CompanyAnalysisForm({ analysis, onChange }: CompanyAnalysisFormProps) {
+export default function CompanyAnalysisForm({ analysis, onChange, companyName }: CompanyAnalysisFormProps) {
+  const [showResearch, setShowResearch] = useState(false);
+
+  const handleApplyResearch = (summary: string) => {
+    const existingContent = analysis.whyThisCompany || '';
+    const newContent = existingContent
+      ? `${existingContent}\n\n--- AI企業研究より ---\n${summary}`
+      : summary;
+    onChange({ ...analysis, whyThisCompany: newContent });
+    setShowResearch(false);
+  };
+
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">企業分析メモ</h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-gray-900">企業分析メモ</h3>
+          <button
+            type="button"
+            onClick={() => setShowResearch(!showResearch)}
+            className={`flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg border transition-colors ${
+              showResearch
+                ? 'bg-indigo-600 text-white border-indigo-600'
+                : 'border-indigo-400 text-indigo-700 hover:bg-indigo-50'
+            }`}
+          >
+            <Search className="w-4 h-4" />
+            AI企業研究
+            {showResearch ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+          </button>
+        </div>
+
+        {/* AI企業研究パネル */}
+        {showResearch && (
+          <div className="mb-6 p-4 border border-indigo-200 rounded-lg bg-indigo-50/30">
+            <CompanyResearch
+              companyName={companyName || ''}
+              onApplyToAnalysis={handleApplyResearch}
+            />
+          </div>
+        )}
+
         <p className="text-sm text-gray-600 mb-4">
           自分にとってのその企業を言語化し、面接対策に活用しましょう
         </p>
