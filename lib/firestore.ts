@@ -29,6 +29,19 @@ const companyToFirestore = (company: Company) => {
       scheduledDate: step.scheduledDate ? Timestamp.fromDate(new Date(step.scheduledDate)) : null,
       completedDate: step.completedDate ? Timestamp.fromDate(new Date(step.completedDate)) : null,
     })),
+    interviewLogs: (company.interviewLogs || []).map(log => ({
+      ...log,
+      date: log.date ? Timestamp.fromDate(new Date(log.date)) : null,
+    })),
+    companyAnalysis: {
+      ...company.companyAnalysis,
+      aiResearch: company.companyAnalysis?.aiResearch
+        ? {
+            ...company.companyAnalysis.aiResearch,
+            researchedAt: Timestamp.fromDate(new Date(company.companyAnalysis.aiResearch.researchedAt)),
+          }
+        : undefined,
+    },
   };
 };
 
@@ -44,6 +57,19 @@ const firestoreToCompany = (data: any): Company => {
       scheduledDate: step.scheduledDate?.toDate() || null,
       completedDate: step.completedDate?.toDate() || null,
     })) || [],
+    interviewLogs: data.interviewLogs?.map((log: any) => ({
+      ...log,
+      date: log.date?.toDate() || null,
+    })) || [],
+    companyAnalysis: {
+      ...data.companyAnalysis,
+      aiResearch: data.companyAnalysis?.aiResearch
+        ? {
+            ...data.companyAnalysis.aiResearch,
+            researchedAt: data.companyAnalysis.aiResearch.researchedAt?.toDate() || new Date(),
+          }
+        : undefined,
+    },
   };
 };
 

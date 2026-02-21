@@ -72,12 +72,46 @@ export interface InterviewQuestion {
   order: number;
 }
 
+// AI企業研究結果（保存用）
+export interface AIResearchResult {
+  researchedAt: Date; // 調査日時
+  sources: { url: string; title: string; usedFor: string }[]; // 参照ソース
+  companyOverview: {
+    summary: string;
+    strengths: string[];
+    challenges: string[];
+    businessAreas: string[];
+  };
+  culture: {
+    philosophy: string;
+    values: string[];
+    workStyle: string;
+  };
+  recruitment: {
+    targetPersonality: string;
+    requiredSkills: string[];
+    careerPath: string;
+    appealPoints: string;
+  };
+  strategy: {
+    futureDirection: string;
+    growthAreas: string[];
+  };
+  interviewPrep: {
+    likelyQuestions: string[];
+    keywordsToUse: string[];
+  };
+}
+
 // 企業分析メモ
 export interface CompanyAnalysis {
+  // 自分の主観的な分析
   whyThisCompany?: string; // なぜこの会社か
   employeeImpression?: string; // 社員の印象
   matchingPoints?: string; // 自分とのマッチ度
   concerns?: string; // 懸念点・確認したいこと
+  // AI企業研究の結果（自動保存）
+  aiResearch?: AIResearchResult;
 }
 
 // 事務管理情報

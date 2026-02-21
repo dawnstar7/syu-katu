@@ -3,9 +3,10 @@
 import { useState } from 'react';
 import {
   Search, Plus, X, ExternalLink, ChevronDown, ChevronUp,
-  Sparkles, AlertCircle, CheckCircle, ArrowRight, Wand2,
+  Sparkles, AlertCircle, CheckCircle, Save, Wand2,
   Globe, Users, BarChart2, Building2, Newspaper
 } from 'lucide-react';
+import type { AIResearchResult } from '@/types';
 
 interface SuggestedUrl {
   url: string;
@@ -54,6 +55,7 @@ interface AnalysisResult {
 interface CompanyResearchProps {
   companyName: string;
   onApplyToAnalysis: (summary: string) => void;
+  onSaveResearch?: (result: AIResearchResult) => void;
 }
 
 const TYPE_ICONS: Record<string, any> = {
@@ -72,7 +74,7 @@ const TYPE_COLORS: Record<string, string> = {
   news: 'bg-gray-100 text-gray-700 border-gray-200',
 };
 
-export default function CompanyResearch({ companyName, onApplyToAnalysis }: CompanyResearchProps) {
+export default function CompanyResearch({ companyName, onApplyToAnalysis, onSaveResearch }: CompanyResearchProps) {
   const [urls, setUrls] = useState<string[]>(['']);
   const [suggestedUrls, setSuggestedUrls] = useState<SuggestedUrl[]>([]);
   const [selectedSuggestions, setSelectedSuggestions] = useState<Set<string>>(new Set());
@@ -187,6 +189,20 @@ export default function CompanyResearch({ companyName, onApplyToAnalysis }: Comp
       setResult(data.analysis);
       setFetchedPages(data.fetchedPages || []);
       setFailedPages(data.failedPages || []);
+
+      // onSaveResearch が渡されていれば自動で保存
+      if (onSaveResearch && data.analysis) {
+        const researchResult: AIResearchResult = {
+          researchedAt: new Date(),
+          sources: data.analysis.sources || [],
+          companyOverview: data.analysis.companyOverview,
+          culture: data.analysis.culture,
+          recruitment: data.analysis.recruitment,
+          strategy: data.analysis.strategy,
+          interviewPrep: data.analysis.interviewPrep,
+        };
+        onSaveResearch(researchResult);
+      }
     } catch {
       setError('通信エラーが発生しました。もう一度お試しください。');
     } finally {
@@ -423,14 +439,21 @@ export default function CompanyResearch({ companyName, onApplyToAnalysis }: Comp
         <div className="space-y-3">
           <div className="flex items-center justify-between">
             <h4 className="font-semibold text-gray-900">📊 分析結果</h4>
-            <button
-              type="button"
-              onClick={() => onApplyToAnalysis(result.rawSummaryForAnalysis)}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 transition-colors"
-            >
-              <ArrowRight className="w-4 h-4" />
-              企業分析メモに反映
-            </button>
+            {onSaveResearch ? (
+              <div className="flex items-center gap-1.5 text-xs text-green-600 font-medium">
+                <CheckCircle className="w-4 h-4" />
+                保存済み
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => onApplyToAnalysis(result.rawSummaryForAnalysis)}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 transition-colors"
+              >
+                <Save className="w-4 h-4" />
+                企業分析メモに反映
+              </button>
+            )}
           </div>
 
           {/* 事業概要 */}
