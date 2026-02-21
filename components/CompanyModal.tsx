@@ -17,11 +17,12 @@ interface CompanyModalProps {
   onDelete?: (companyId: string) => void;
   company?: Company;
   selfAnalysis?: SelfAnalysisData;
+  onAutoSaveAnalysis?: (companyId: string, analysis: CompanyAnalysis) => Promise<void>;
 }
 
 type TabType = 'basic' | 'es' | 'interview' | 'analysis' | 'admin';
 
-export default function CompanyModal({ isOpen, onClose, onSave, onDelete, company, selfAnalysis }: CompanyModalProps) {
+export default function CompanyModal({ isOpen, onClose, onSave, onDelete, company, selfAnalysis, onAutoSaveAnalysis }: CompanyModalProps) {
   const [activeTab, setActiveTab] = useState<TabType>('basic');
 
   const [formData, setFormData] = useState({
@@ -477,7 +478,13 @@ export default function CompanyModal({ isOpen, onClose, onSave, onDelete, compan
             {activeTab === 'analysis' && (
               <CompanyAnalysisForm
                 analysis={companyAnalysis}
-                onChange={setCompanyAnalysis}
+                onChange={async (newAnalysis) => {
+                  setCompanyAnalysis(newAnalysis);
+                  // AI研究結果が含まれていたら即時自動保存
+                  if (newAnalysis.aiResearch && company?.id && onAutoSaveAnalysis) {
+                    await onAutoSaveAnalysis(company.id, newAnalysis);
+                  }
+                }}
                 companyName={formData.name}
               />
             )}

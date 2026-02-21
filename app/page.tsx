@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Plus, Search, Filter, Building2, Calendar as CalendarIcon, List, Lightbulb } from 'lucide-react';
 import Link from 'next/link';
-import type { Company, SelectionStatus, CalendarEvent, SelfAnalysisData } from '@/types';
+import type { Company, SelectionStatus, CalendarEvent, SelfAnalysisData, CompanyAnalysis } from '@/types';
 import { STATUS_LABELS, STATUS_COLORS } from '@/types';
 import CompanyModal from '@/components/CompanyModal';
 import Calendar from '@/components/Calendar';
@@ -97,6 +97,25 @@ export default function Home() {
     } catch (error) {
       console.error('保存に失敗しました:', error);
       alert('保存に失敗しました。もう一度お試しください。');
+    }
+  };
+
+  // AI企業研究完了時の即時自動保存
+  const handleAutoSaveAnalysis = async (companyId: string, analysis: CompanyAnalysis) => {
+    if (!user) return;
+    const target = companies.find(c => c.id === companyId);
+    if (!target) return;
+    try {
+      const updated: Company = {
+        ...target,
+        companyAnalysis: analysis,
+        updatedAt: new Date(),
+      };
+      await saveCompany(user.uid, updated);
+      setCompanies(prev => prev.map(c => c.id === companyId ? updated : c));
+      setSelectedCompany(updated);
+    } catch (error) {
+      console.error('自動保存に失敗しました:', error);
     }
   };
 
@@ -469,6 +488,7 @@ export default function Home() {
         onDelete={handleDeleteCompany}
         company={selectedCompany}
         selfAnalysis={selfAnalysis}
+        onAutoSaveAnalysis={handleAutoSaveAnalysis}
       />
 
       <EventDetailModal
