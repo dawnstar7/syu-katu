@@ -247,9 +247,16 @@ export default function CompanyModal({ isOpen, onClose, onSave, onDelete, compan
                     <select value={formData.currentStatus}
                       onChange={(e) => setFormData({ ...formData, currentStatus: e.target.value as SelectionStatus })}
                       className={inputClass} disabled={isLoadingAI}>
-                      {Object.entries(STATUS_LABELS).map(([value, label]) => (
-                        <option key={value} value={value}>{label}</option>
-                      ))}
+                      <option value="interested">興味あり</option>
+                      <option value="document_screening">書類・ES選考中</option>
+                      <option value="interview_1">面接中</option>
+                      <option value="offer">内定</option>
+                      <option value="rejected">不合格</option>
+                      <option value="declined">辞退</option>
+                      {/* 既存データの古い値も表示できるよう残す */}
+                      {['es_writing','es_submitted','interview_2','interview_3','interview_final'].includes(formData.currentStatus) && (
+                        <option value={formData.currentStatus}>{STATUS_LABELS[formData.currentStatus]}</option>
+                      )}
                     </select>
                   </div>
 
