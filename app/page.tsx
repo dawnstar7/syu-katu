@@ -7,6 +7,7 @@ import type { Company, SelectionStatus, CalendarEvent, SelfAnalysisData, Company
 import { STATUS_LABELS, STATUS_COLORS } from '@/types';
 import CompanyModal from '@/components/CompanyModal';
 import Calendar from '@/components/Calendar';
+import ScheduleTimeline from '@/components/ScheduleTimeline';
 import UpcomingEvents from '@/components/UpcomingEvents';
 import EventDetailModal from '@/components/EventDetailModal';
 import AuthButton from '@/components/AuthButton';
@@ -31,7 +32,7 @@ export default function Home() {
   const [filterStatus, setFilterStatus] = useState<SelectionStatus | 'all'>('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<Company | undefined>(undefined);
-  const [currentView, setCurrentView] = useState<'list' | 'calendar'>('list');
+  const [currentView, setCurrentView] = useState<'schedule' | 'list' | 'calendar'>('schedule');
   const [isEventModalOpen, setIsEventModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
 
@@ -270,7 +271,7 @@ export default function Home() {
               <AuthButton />
               <Link
                 href="/self-analysis"
-                className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+                className="hidden sm:flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
               >
                 <Lightbulb className="w-5 h-5" />
                 <span className="hidden sm:inline">自己分析</span>
@@ -287,9 +288,20 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* ビュー切り替えタブ */}
-        <div className="flex gap-2 mb-6">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-24 md:pb-8">
+        {/* ビュー切り替えタブ（デスクトップのみ） */}
+        <div className="hidden md:flex gap-2 mb-6">
+          <button
+            onClick={() => setCurrentView('schedule')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+              currentView === 'schedule'
+                ? 'bg-blue-600 text-white'
+                : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+            }`}
+          >
+            <CalendarIcon className="w-5 h-5" />
+            スケジュール
+          </button>
           <button
             onClick={() => setCurrentView('list')}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
@@ -378,6 +390,11 @@ export default function Home() {
             </p>
           </div>
         </div>
+        )}
+
+        {/* スケジュールビュー */}
+        {currentView === 'schedule' && (
+          <ScheduleTimeline events={calendarEvents} onEventClick={handleEventClick} />
         )}
 
         {/* カレンダービュー */}
@@ -477,6 +494,37 @@ export default function Home() {
         )
         )}
       </main>
+
+      {/* ボトムナビゲーション（スマホのみ） */}
+      <nav className="fixed bottom-0 left-0 right-0 z-20 bg-white border-t border-gray-200 md:hidden">
+        <div className="flex">
+          <button
+            onClick={() => setCurrentView('schedule')}
+            className={`flex-1 flex flex-col items-center gap-1 py-3 transition-colors ${
+              currentView === 'schedule' ? 'text-blue-600' : 'text-gray-500'
+            }`}
+          >
+            <CalendarIcon className="w-5 h-5" />
+            <span className="text-xs font-medium">スケジュール</span>
+          </button>
+          <button
+            onClick={() => setCurrentView('list')}
+            className={`flex-1 flex flex-col items-center gap-1 py-3 transition-colors ${
+              currentView === 'list' ? 'text-blue-600' : 'text-gray-500'
+            }`}
+          >
+            <Building2 className="w-5 h-5" />
+            <span className="text-xs font-medium">企業</span>
+          </button>
+          <Link
+            href="/self-analysis"
+            className="flex-1 flex flex-col items-center gap-1 py-3 text-gray-500 transition-colors hover:text-purple-600"
+          >
+            <Lightbulb className="w-5 h-5" />
+            <span className="text-xs font-medium">自己分析</span>
+          </Link>
+        </div>
+      </nav>
 
       <CompanyModal
         isOpen={isModalOpen}
