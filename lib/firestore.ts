@@ -10,7 +10,7 @@ import {
   Timestamp,
 } from 'firebase/firestore';
 import { db } from './firebase';
-import type { Company } from '@/types';
+import type { Company, SelfAnalysisData } from '@/types';
 
 /**
  * Firestoreのデータ操作ユーティリティ
@@ -148,6 +148,115 @@ export const saveCompanies = async (userId: string, companies: Company[]): Promi
     await Promise.all(savePromises);
   } catch (error) {
     console.error('Error saving companies:', error);
+    throw error;
+  }
+};
+
+// =========================================================
+// 自己分析データ
+// =========================================================
+
+// Null/undefinedも安全に変換するヘルパー
+const toTs = (d: Date | string | null | undefined) =>
+  d ? Timestamp.fromDate(new Date(d)) : null;
+const fromTs = (ts: any) => ts?.toDate() || null;
+
+// SelfAnalysisDataをFirestore用に変換
+const selfAnalysisToFirestore = (data: SelfAnalysisData) => ({
+  episodes: (data.episodes || []).map(ep => ({
+    ...ep,
+    createdAt: toTs(ep.createdAt),
+    updatedAt: toTs(ep.updatedAt),
+  })),
+  values: data.values ? {
+    ...data.values,
+    createdAt: toTs(data.values.createdAt),
+    updatedAt: toTs(data.values.updatedAt),
+  } : null,
+  strengths: (data.strengths || []).map(s => ({
+    ...s,
+    createdAt: toTs(s.createdAt),
+    updatedAt: toTs(s.updatedAt),
+  })),
+  weaknesses: (data.weaknesses || []).map(w => ({
+    ...w,
+    createdAt: toTs(w.createdAt),
+    updatedAt: toTs(w.updatedAt),
+  })),
+  vision: data.vision ? {
+    ...data.vision,
+    createdAt: toTs(data.vision.createdAt),
+    updatedAt: toTs(data.vision.updatedAt),
+  } : null,
+  freeNotes: (data.freeNotes || []).map(n => ({
+    ...n,
+    createdAt: toTs(n.createdAt),
+    updatedAt: toTs(n.updatedAt),
+  })),
+});
+
+// FirestoreデータをSelfAnalysisDataに変換
+const firestoreToSelfAnalysis = (data: any): SelfAnalysisData => ({
+  episodes: (data.episodes || []).map((ep: any) => ({
+    ...ep,
+    createdAt: fromTs(ep.createdAt) ?? new Date(),
+    updatedAt: fromTs(ep.updatedAt) ?? new Date(),
+  })),
+  values: data.values ? {
+    ...data.values,
+    createdAt: fromTs(data.values.createdAt) ?? new Date(),
+    updatedAt: fromTs(data.values.updatedAt) ?? new Date(),
+  } : null,
+  strengths: (data.strengths || []).map((s: any) => ({
+    ...s,
+    createdAt: fromTs(s.createdAt) ?? new Date(),
+    updatedAt: fromTs(s.updatedAt) ?? new Date(),
+  })),
+  weaknesses: (data.weaknesses || []).map((w: any) => ({
+    ...w,
+    createdAt: fromTs(w.createdAt) ?? new Date(),
+    updatedAt: fromTs(w.updatedAt) ?? new Date(),
+  })),
+  vision: data.vision ? {
+    ...data.vision,
+    createdAt: fromTs(data.vision.createdAt) ?? new Date(),
+    updatedAt: fromTs(data.vision.updatedAt) ?? new Date(),
+  } : null,
+  freeNotes: (data.freeNotes || []).map((n: any) => ({
+    ...n,
+    createdAt: fromTs(n.createdAt) ?? new Date(),
+    updatedAt: fromTs(n.updatedAt) ?? new Date(),
+  })),
+});
+
+/**
+ * 自己分析データを取得
+ */
+export const getSelfAnalysis = async (userId: string): Promise<SelfAnalysisData | null> => {
+  if (!db) return null;
+  try {
+    const docRef = doc(db, 'users', userId, 'selfAnalysis', 'data');
+    const snapshot = await getDoc(docRef);
+    if (snapshot.exists()) {
+      return firestoreToSelfAnalysis(snapshot.data());
+    }
+    return null;
+  } catch (error) {
+    console.error('Error fetching selfAnalysis:', error);
+    return null;
+  }
+};
+
+/**
+ * 自己分析データを保存
+ */
+export const saveSelfAnalysis = async (userId: string, data: SelfAnalysisData): Promise<void> => {
+  if (!db) throw new Error('Firestore is not initialized');
+  try {
+    const docRef = doc(db, 'users', userId, 'selfAnalysis', 'data');
+    await setDoc(docRef, selfAnalysisToFirestore(data));
+  } catch (error) {
+    console.error('Error saving selfAnalysis:', error);
     throw error;
   }
 };

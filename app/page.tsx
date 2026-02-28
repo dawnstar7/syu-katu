@@ -12,7 +12,7 @@ import UpcomingEvents from '@/components/UpcomingEvents';
 import EventDetailModal from '@/components/EventDetailModal';
 import AuthButton from '@/components/AuthButton';
 import { useAuth } from '@/contexts/AuthContext';
-import { getCompanies, saveCompany, deleteCompany as deleteCompanyFromFirestore } from '@/lib/firestore';
+import { getCompanies, saveCompany, deleteCompany as deleteCompanyFromFirestore, getSelfAnalysis } from '@/lib/firestore';
 import { loadSelfAnalysisData } from '@/lib/selfAnalysisStorage';
 import { format } from 'date-fns';
 
@@ -52,10 +52,16 @@ export default function Home() {
       }
 
       try {
-        const loadedCompanies = await getCompanies(user.uid);
+        // 企業データと自己分析データを並行取得
+        const [loadedCompanies, loadedSelfAnalysis] = await Promise.all([
+          getCompanies(user.uid),
+          getSelfAnalysis(user.uid),
+        ]);
         setCompanies(loadedCompanies);
+        setSelfAnalysis(loadedSelfAnalysis ?? loadSelfAnalysisData());
       } catch (error) {
         console.error('データの読み込みに失敗しました:', error);
+        setSelfAnalysis(loadSelfAnalysisData());
       } finally {
         setIsLoaded(true);
       }
@@ -65,12 +71,6 @@ export default function Home() {
       loadData();
     }
   }, [user, authLoading]);
-
-  // 自己分析データをLocalStorageから読み込む（selfAnalysisStorageと同じキーを使用）
-  useEffect(() => {
-    const data = loadSelfAnalysisData();
-    setSelfAnalysis(data);
-  }, []);
 
   const handleSaveCompany = async (companyData: Omit<Company, 'id' | 'createdAt' | 'updatedAt'>) => {
     if (!user) return;

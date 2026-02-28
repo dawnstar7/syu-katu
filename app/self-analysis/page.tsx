@@ -1,10 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Lightbulb, BookOpen, StickyNote, ArrowLeft, ChevronDown, ChevronUp, Sparkles, TrendingUp, Target, Calendar as CalendarIcon, Building2 } from 'lucide-react';
 import Link from 'next/link';
 import type { SelfAnalysisData } from '@/types';
 import { loadSelfAnalysisData, saveSelfAnalysisData } from '@/lib/selfAnalysisStorage';
+import { getSelfAnalysis, saveSelfAnalysis } from '@/lib/firestore';
+import { useAuth } from '@/contexts/AuthContext';
 import EpisodesManager from '@/components/self-analysis/EpisodesManager';
 import ValuesManager from '@/components/self-analysis/ValuesManager';
 import StrengthsManager from '@/components/self-analysis/StrengthsManager';
@@ -14,6 +16,7 @@ import FreeNotesManager from '@/components/self-analysis/FreeNotesManager';
 type TabType = 'self-understanding' | 'episodes' | 'notes';
 
 export default function SelfAnalysisPage() {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<TabType>('self-understanding');
   const [selfAnalysisData, setSelfAnalysisData] = useState<SelfAnalysisData>({
     episodes: [],
@@ -24,6 +27,7 @@ export default function SelfAnalysisPage() {
     freeNotes: [],
   });
   const [isLoaded, setIsLoaded] = useState(false);
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // 自己理解タブ内の折りたたみ状態
   const [openSections, setOpenSections] = useState({
@@ -32,16 +36,52 @@ export default function SelfAnalysisPage() {
     vision: false,
   });
 
+  // データ読み込み：ログイン時はFirestore優先、未ログインはlocalStorage
   useEffect(() => {
-    const data = loadSelfAnalysisData();
-    setSelfAnalysisData(data);
-    setIsLoaded(true);
-  }, []);
+    const loadData = async () => {
+      if (user) {
+        // Firestoreから取得
+        const firestoreData = await getSelfAnalysis(user.uid);
+        if (firestoreData) {
+          setSelfAnalysisData(firestoreData);
+          setIsLoaded(true);
+          return;
+        }
+        // Firestoreにデータがない場合はlocalStorageから移行
+        const localData = loadSelfAnalysisData();
+        setSelfAnalysisData(localData);
+        // localStorageにデータがあれば自動でFirestoreへ移行
+        const hasLocalData =
+          localData.episodes.length > 0 ||
+          localData.strengths.length > 0 ||
+          localData.values !== null ||
+          localData.vision !== null ||
+          localData.freeNotes.length > 0;
+        if (hasLocalData) {
+          saveSelfAnalysis(user.uid, localData).catch(console.error);
+        }
+      } else {
+        // 未ログイン：localStorageのみ
+        setSelfAnalysisData(loadSelfAnalysisData());
+      }
+      setIsLoaded(true);
+    };
+    loadData();
+  }, [user]);
 
+  // データ保存：localStorageに即時 + Firestore（ログイン時）にデバウンス保存
   useEffect(() => {
-    if (isLoaded) {
-      saveSelfAnalysisData(selfAnalysisData);
+    if (!isLoaded) return;
+    // localStorageへ即時保存（オフライン対応）
+    saveSelfAnalysisData(selfAnalysisData);
+    // Firestoreへデバウンス保存（1.5秒後）
+    if (user) {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = setTimeout(() => {
+        saveSelfAnalysis(user.uid, selfAnalysisData).catch(console.error);
+      }, 1500);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selfAnalysisData, isLoaded]);
 
   const toggleSection = (key: keyof typeof openSections) => {
