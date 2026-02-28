@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Lightbulb, BookOpen, StickyNote, ArrowLeft, ChevronDown, ChevronUp, Sparkles, TrendingUp, Target } from 'lucide-react';
+import { Lightbulb, BookOpen, StickyNote, ArrowLeft, ChevronDown, ChevronUp, Sparkles, TrendingUp, Target, Calendar as CalendarIcon, Building2 } from 'lucide-react';
 import Link from 'next/link';
 import type { SelfAnalysisData } from '@/types';
 import { loadSelfAnalysisData, saveSelfAnalysisData } from '@/lib/selfAnalysisStorage';
@@ -72,7 +72,7 @@ export default function SelfAnalysisPage() {
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 md:pb-6">
 
         {/* タブ */}
         <div className="flex gap-1 p-1 bg-white rounded-xl shadow-sm border border-gray-200 mb-6">
@@ -214,6 +214,30 @@ export default function SelfAnalysisPage() {
           )}
         </div>
       </main>
+
+      {/* ボトムナビゲーション（スマホのみ） */}
+      <nav className="fixed bottom-0 left-0 right-0 z-20 bg-white border-t border-gray-200 md:hidden">
+        <div className="flex">
+          <Link
+            href="/"
+            className="flex-1 flex flex-col items-center gap-1 py-3 text-gray-500 transition-colors hover:text-blue-600"
+          >
+            <CalendarIcon className="w-5 h-5" />
+            <span className="text-xs font-medium">スケジュール</span>
+          </Link>
+          <Link
+            href="/?view=list"
+            className="flex-1 flex flex-col items-center gap-1 py-3 text-gray-500 transition-colors hover:text-blue-600"
+          >
+            <Building2 className="w-5 h-5" />
+            <span className="text-xs font-medium">企業</span>
+          </Link>
+          <span className="flex-1 flex flex-col items-center gap-1 py-3 text-purple-600">
+            <Lightbulb className="w-5 h-5" />
+            <span className="text-xs font-medium">自己分析</span>
+          </span>
+        </div>
+      </nav>
     </div>
   );
 }

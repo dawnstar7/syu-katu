@@ -32,7 +32,13 @@ export default function Home() {
   const [filterStatus, setFilterStatus] = useState<SelectionStatus | 'all'>('all');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<Company | undefined>(undefined);
-  const [currentView, setCurrentView] = useState<'schedule' | 'list' | 'calendar'>('schedule');
+  const [currentView, setCurrentView] = useState<'schedule' | 'list' | 'calendar'>(() => {
+    if (typeof window !== 'undefined') {
+      const v = new URLSearchParams(window.location.search).get('view');
+      if (v === 'list' || v === 'calendar') return v;
+    }
+    return 'schedule';
+  });
   const [isEventModalOpen, setIsEventModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
 
