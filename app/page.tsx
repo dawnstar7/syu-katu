@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Plus, Search, Filter, Building2, Calendar as CalendarIcon, List, Lightbulb } from 'lucide-react';
+import { Plus, Search, Filter, Building2, Calendar as CalendarIcon, List, Lightbulb, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import type { Company, SelectionStatus, CalendarEvent, SelfAnalysisData, CompanyAnalysis } from '@/types';
 import { STATUS_LABELS, STATUS_COLORS } from '@/types';
@@ -174,6 +174,13 @@ export default function Home() {
     return matchesSearch && matchesStatus;
   });
 
+  // 統計
+  const inProgressCount = companies.filter((c) =>
+    ['es_writing', 'es_submitted', 'document_screening', 'interview_1', 'interview_2', 'interview_3', 'interview_final'].includes(c.currentStatus)
+  ).length;
+  const offerCount = companies.filter((c) => c.currentStatus === 'offer').length;
+  const rejectedCount = companies.filter((c) => c.currentStatus === 'rejected').length;
+
   // カレンダーイベントを生成
   const calendarEvents = useMemo(() => {
     const events: CalendarEvent[] = [];
@@ -334,68 +341,63 @@ export default function Home() {
 
         {/* 検索とフィルター（リストビューのみ） */}
         {currentView === 'list' && (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
-          <div className="flex flex-col sm:flex-row gap-4">
-            {/* 検索バー */}
+          <div className="flex gap-2 mb-3">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
                 type="text"
-                placeholder="企業名、業界で検索..."
+                placeholder="企業名・業界で検索"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 text-gray-900 placeholder:text-gray-500 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-8 pr-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-
-            {/* ステータスフィルター */}
-            <div className="flex items-center gap-2">
-              <Filter className="w-5 h-5 text-gray-400" />
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value as SelectionStatus | 'all')}
-                className="px-4 py-2 text-gray-900 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="all">すべてのステータス</option>
-                {Object.entries(STATUS_LABELS).map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value as SelectionStatus | 'all')}
+              className="px-2 py-2 text-sm text-gray-900 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="all">すべて</option>
+              {Object.entries(STATUS_LABELS).map(([value, label]) => (
+                <option key={value} value={value}>{label}</option>
+              ))}
+            </select>
           </div>
-        </div>
         )}
 
         {/* 統計情報（リストビューのみ） */}
         {currentView === 'list' && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <p className="text-sm text-gray-600 mb-1">総企業数</p>
-            <p className="text-2xl font-bold text-gray-900">{companies.length}</p>
-          </div>
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <p className="text-sm text-gray-600 mb-1">選考中</p>
-            <p className="text-2xl font-bold text-blue-600">
-              {companies.filter((c) =>
-                ['es_writing', 'es_submitted', 'document_screening', 'interview_1', 'interview_2', 'interview_3', 'interview_final'].includes(c.currentStatus)
-              ).length}
-            </p>
-          </div>
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <p className="text-sm text-gray-600 mb-1">内定</p>
-            <p className="text-2xl font-bold text-green-600">
-              {companies.filter((c) => c.currentStatus === 'offer').length}
-            </p>
-          </div>
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-            <p className="text-sm text-gray-600 mb-1">不合格</p>
-            <p className="text-2xl font-bold text-red-600">
-              {companies.filter((c) => c.currentStatus === 'rejected').length}
-            </p>
-          </div>
-        </div>
+          <>
+            {/* モバイル：1行コンパクト */}
+            <div className="flex items-center gap-2 text-xs mb-3 sm:hidden">
+              <span className="text-gray-500">全 <span className="font-bold text-gray-800">{companies.length}</span> 社</span>
+              <span className="text-gray-300">|</span>
+              <span className="text-gray-500">選考中 <span className="font-bold text-blue-600">{inProgressCount}</span></span>
+              <span className="text-gray-300">|</span>
+              <span className="text-gray-500">内定 <span className="font-bold text-green-600">{offerCount}</span></span>
+              <span className="text-gray-300">|</span>
+              <span className="text-gray-500">不合格 <span className="font-bold text-red-500">{rejectedCount}</span></span>
+            </div>
+            {/* デスクトップ：4カード */}
+            <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                <p className="text-sm text-gray-600 mb-1">総企業数</p>
+                <p className="text-2xl font-bold text-gray-900">{companies.length}</p>
+              </div>
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                <p className="text-sm text-gray-600 mb-1">選考中</p>
+                <p className="text-2xl font-bold text-blue-600">{inProgressCount}</p>
+              </div>
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                <p className="text-sm text-gray-600 mb-1">内定</p>
+                <p className="text-2xl font-bold text-green-600">{offerCount}</p>
+              </div>
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+                <p className="text-sm text-gray-600 mb-1">不合格</p>
+                <p className="text-2xl font-bold text-red-600">{rejectedCount}</p>
+              </div>
+            </div>
+          </>
         )}
 
         {/* スケジュールビュー */}
@@ -437,66 +439,87 @@ export default function Home() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-            {filteredCompanies.map((company) => {
-              // 直近の予定を取得
-              const upcomingStep = company.selectionSteps
-                .filter(step => step.scheduledDate && new Date(step.scheduledDate) >= new Date())
-                .sort((a, b) => new Date(a.scheduledDate!).getTime() - new Date(b.scheduledDate!).getTime())[0];
-
-              return (
-                <div
-                  key={company.id}
-                  onClick={() => handleEditCompany(company)}
-                  className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all cursor-pointer"
-                >
-                  {/* 企業名とステータス */}
-                  <div className="flex items-start justify-between gap-3 mb-3">
-                    <h3 className="text-base font-bold text-gray-900 line-clamp-2 flex-1">
-                      {company.name}
-                    </h3>
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap ${STATUS_COLORS[company.currentStatus]}`}>
-                      {STATUS_LABELS[company.currentStatus]}
-                    </span>
-                  </div>
-
-                  {/* 業界・職種 */}
-                  <div className="space-y-1 mb-3">
-                    {company.industry && (
-                      <p className="text-sm text-gray-600 flex items-center gap-1">
-                        <span className="text-gray-400">📊</span>
-                        {company.industry}
-                      </p>
-                    )}
-                    {company.jobType && (
-                      <p className="text-sm text-gray-600 flex items-center gap-1">
-                        <span className="text-gray-400">💼</span>
-                        {company.jobType}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* 直近の予定 */}
-                  {upcomingStep && (
-                    <div className="bg-blue-50 rounded-lg px-3 py-2 mb-3">
-                      <p className="text-xs text-blue-600 font-medium mb-1">直近の予定</p>
-                      <p className="text-sm text-gray-900 font-medium">{upcomingStep.name}</p>
-                      <p className="text-xs text-gray-600 mt-1">
-                        {format(new Date(upcomingStep.scheduledDate!), 'M月d日 HH:mm')}
-                      </p>
+          <>
+            {/* モバイル：コンパクトリスト */}
+            <div className="sm:hidden bg-white rounded-xl shadow-sm border border-gray-200 divide-y divide-gray-100">
+              {filteredCompanies.map((company) => {
+                const upcomingStep = company.selectionSteps
+                  .filter(step => step.scheduledDate && new Date(step.scheduledDate) >= new Date())
+                  .sort((a, b) => new Date(a.scheduledDate!).getTime() - new Date(b.scheduledDate!).getTime())[0];
+                const subText = [company.industry, upcomingStep?.name].filter(Boolean).join(' · ');
+                return (
+                  <button
+                    key={company.id}
+                    type="button"
+                    onClick={() => handleEditCompany(company)}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-left active:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium text-sm text-gray-900 truncate flex-1">{company.name}</span>
+                        <span className={`flex-shrink-0 px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[company.currentStatus]}`}>
+                          {STATUS_LABELS[company.currentStatus]}
+                        </span>
+                      </div>
+                      {subText && (
+                        <p className="text-xs text-gray-400 mt-0.5 truncate">{subText}</p>
+                      )}
                     </div>
-                  )}
+                    <ChevronRight className="flex-shrink-0 w-4 h-4 text-gray-300" />
+                  </button>
+                );
+              })}
+            </div>
 
-                  {/* 選考進捗 */}
-                  {company.selectionSteps.length > 0 && (
-                    <div className="text-xs text-gray-500">
-                      選考ステップ: {company.selectionSteps.filter(s => s.status === 'completed').length}/{company.selectionSteps.length} 完了
+            {/* デスクトップ：カードグリッド */}
+            <div className="hidden sm:grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
+              {filteredCompanies.map((company) => {
+                const upcomingStep = company.selectionSteps
+                  .filter(step => step.scheduledDate && new Date(step.scheduledDate) >= new Date())
+                  .sort((a, b) => new Date(a.scheduledDate!).getTime() - new Date(b.scheduledDate!).getTime())[0];
+                return (
+                  <div
+                    key={company.id}
+                    onClick={() => handleEditCompany(company)}
+                    className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-all cursor-pointer"
+                  >
+                    <div className="flex items-start justify-between gap-3 mb-3">
+                      <h3 className="text-base font-bold text-gray-900 line-clamp-2 flex-1">{company.name}</h3>
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap ${STATUS_COLORS[company.currentStatus]}`}>
+                        {STATUS_LABELS[company.currentStatus]}
+                      </span>
                     </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+                    <div className="space-y-1 mb-3">
+                      {company.industry && (
+                        <p className="text-sm text-gray-600 flex items-center gap-1">
+                          <span className="text-gray-400">📊</span>{company.industry}
+                        </p>
+                      )}
+                      {company.jobType && (
+                        <p className="text-sm text-gray-600 flex items-center gap-1">
+                          <span className="text-gray-400">💼</span>{company.jobType}
+                        </p>
+                      )}
+                    </div>
+                    {upcomingStep && (
+                      <div className="bg-blue-50 rounded-lg px-3 py-2 mb-3">
+                        <p className="text-xs text-blue-600 font-medium mb-1">直近の予定</p>
+                        <p className="text-sm text-gray-900 font-medium">{upcomingStep.name}</p>
+                        <p className="text-xs text-gray-600 mt-1">
+                          {format(new Date(upcomingStep.scheduledDate!), 'M月d日 HH:mm')}
+                        </p>
+                      </div>
+                    )}
+                    {company.selectionSteps.length > 0 && (
+                      <div className="text-xs text-gray-500">
+                        選考ステップ: {company.selectionSteps.filter(s => s.status === 'completed').length}/{company.selectionSteps.length} 完了
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </>
         )
         )}
       </main>
